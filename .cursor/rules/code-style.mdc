@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Code Style & Formatting Standards
+
+## General Formatting
+- Use 4 spaces for indentation (not tabs)
+- Use single quotes for strings
+- Use semicolons at the end of statements
+- Use trailing commas in objects and arrays
+- Maximum line length: 100 characters
+- Use LF line endings
+
+## TypeScript Configuration
+- Strict TypeScript mode enabled
+- Use ES2017 target
+- Module resolution: bundler
+- Path aliases: `@/*` maps to `./*`
+- Always use explicit types for function parameters and return values
+- Use `Readonly<T>` for props interfaces when appropriate
+
+## Import/Export Organization
+- Sort imports in natural order (ascending)
+- Group imports with newlines between groups:
+  1. Type imports
+  2. Built-in and external imports
+  3. Internal type imports
+  4. Internal imports
+  5. Parent/sibling/index type imports
+  6. Parent/sibling/index imports
+  7. Object/unknown imports
+- Use named imports/exports in alphabetical order
+- Use `@/*` path alias for internal imports
+
+## Prettier Configuration
+- Arrow function parentheses: avoid when possible
+- Bracket same line: false
+- Bracket spacing: true
+- JSX single quotes: true
+- Print width: 100
+- Semi: true
+- Single quotes: true
+- Tab width: 4
+- Trailing comma: es5
+- Use tabs: false
+
+## File Naming & Organization
+- Use kebab-case for file names
+- Use PascalCase for component names
+- Use camelCase for variables, functions, and properties
