@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
@@ -27,7 +28,9 @@ export function HeroSection() {
                 Skip the noise. Invest smarter.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 mb-4 w-full max-w-md mx-auto justify-center'>
-                <Button className='w-full sm:w-auto'>Start Free Trial</Button>
+                <Link href='/dashboard'>
+                    <Button className='w-full sm:w-auto'>Start Free Trial</Button>
+                </Link>
             </div>
         </motion.section>
     );

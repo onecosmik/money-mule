@@ -498,9 +498,9 @@ export default function DocumentsPage() {
                                                     </h4>
                                                     <ul className='space-y-1 text-sm'>
                                                         {selectedDocument.result.risk_summary.critical.map(
-                                                            (risk, index) => (
+                                                            risk => (
                                                                 <li
-                                                                    key={`critical-${risk.slice(0, 20)}-${index}`}
+                                                                    key={`critical-${risk}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-red-500 mt-1'>
@@ -532,9 +532,9 @@ export default function DocumentsPage() {
                                                     </h4>
                                                     <ul className='space-y-1 text-sm'>
                                                         {selectedDocument.result.risk_summary.medium.map(
-                                                            (risk, index) => (
+                                                            risk => (
                                                                 <li
-                                                                    key={`medium-${risk.slice(0, 20)}-${index}`}
+                                                                    key={`medium-${risk}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-yellow-500 mt-1'>
@@ -565,9 +565,9 @@ export default function DocumentsPage() {
                                                     </h4>
                                                     <ul className='space-y-1 text-sm'>
                                                         {selectedDocument.result.risk_summary.low.map(
-                                                            (risk, index) => (
+                                                            risk => (
                                                                 <li
-                                                                    key={`low-${risk.slice(0, 20)}-${index}`}
+                                                                    key={`low-${risk}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-green-500 mt-1'>

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
@@ -24,9 +25,11 @@ export function FinalCTASection() {
                 today.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 w-full max-w-xs sm:max-w-none justify-center'>
-                <Button className='bg-white hover:bg-white/80 text-green-700 font-bold w-full sm:w-auto'>
-                    Start Free Trial
-                </Button>
+                <Link href='/dashboard'>
+                    <Button className='bg-white hover:bg-white/80 text-green-700 font-bold w-full sm:w-auto'>
+                        Start Free Trial
+                    </Button>
+                </Link>
             </div>
         </motion.section>
     );

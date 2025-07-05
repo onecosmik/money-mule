@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +42,9 @@ export function PricingSection() {
                         <CardContent>
                             <div className='text-3xl font-bold mb-2'>$99/mo</div>
                             <div className='mb-4'>Unlimited access to all features</div>
-                            <Button className='w-full'>Start Free Trial</Button>
+                            <Link href='/dashboard'>
+                                <Button className='w-full'>Start Free Trial</Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -60,9 +63,11 @@ export function PricingSection() {
                         <CardContent>
                             <div className='text-3xl font-bold mb-2'>$25</div>
                             <div className='mb-4'>Per investment analysis</div>
-                            <Button className='w-full' variant='outline'>
-                                Get Started
-                            </Button>
+                            <Link href='/dashboard'>
+                                <Button className='w-full' variant='outline'>
+                                    Get Started
+                                </Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -81,7 +86,9 @@ export function PricingSection() {
                         <CardContent>
                             <div className='text-3xl font-bold mb-2'>2-5%</div>
                             <div className='mb-4'>Of successful investment returns</div>
-                            <Button className='w-full'>Contact Sales</Button>
+                            <Link href='/dashboard'>
+                                <Button className='w-full'>Contact Sales</Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </motion.div>
