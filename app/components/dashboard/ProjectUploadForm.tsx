@@ -26,7 +26,7 @@ export function ProjectUploadForm({ onUpload, uploading }: ProjectUploadFormProp
 
     const handleUpload = async () => {
         if (!selectedFile || !projectName.trim()) {
-            alert('Please select a file and enter a project name');
+            console.error('Please select a file and enter a project name');
             return;
         }
 
