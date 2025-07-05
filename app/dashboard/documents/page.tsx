@@ -179,7 +179,7 @@ export default function DocumentsPage() {
             });
 
             if (response.ok) {
-                const result = await response.json();
+                const result = (await response.json()) as DocumentAnalysis['result'];
                 updateDocumentStatus(newDocument.id, 'completed', 100, result);
             } else {
                 updateDocumentStatus(newDocument.id, 'failed', 0);
@@ -194,7 +194,7 @@ export default function DocumentsPage() {
         id: string,
         status: DocumentAnalysis['status'],
         progress: number,
-        result?: any
+        result?: DocumentAnalysis['result']
     ) => {
         setDocuments(prevDocuments => {
             const updatedDocuments = prevDocuments.map(document => {
@@ -500,7 +500,7 @@ export default function DocumentsPage() {
                                                         {selectedDocument.result.risk_summary.critical.map(
                                                             (risk, index) => (
                                                                 <li
-                                                                    key={index}
+                                                                    key={`critical-${risk.slice(0, 20)}-${index}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-red-500 mt-1'>
@@ -534,7 +534,7 @@ export default function DocumentsPage() {
                                                         {selectedDocument.result.risk_summary.medium.map(
                                                             (risk, index) => (
                                                                 <li
-                                                                    key={index}
+                                                                    key={`medium-${risk.slice(0, 20)}-${index}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-yellow-500 mt-1'>
@@ -567,7 +567,7 @@ export default function DocumentsPage() {
                                                         {selectedDocument.result.risk_summary.low.map(
                                                             (risk, index) => (
                                                                 <li
-                                                                    key={index}
+                                                                    key={`low-${risk.slice(0, 20)}-${index}`}
                                                                     className='flex items-start gap-2'
                                                                 >
                                                                     <span className='text-green-500 mt-1'>

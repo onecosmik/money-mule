@@ -8,6 +8,7 @@ import { DashboardNav } from '@/app/components/navigation/DashboardNav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -61,6 +62,8 @@ export default function DashboardPage() {
     const [projectName, setProjectName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<ProjectAnalysis | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -86,7 +89,6 @@ export default function DashboardPage() {
 
         try {
             localStorage.setItem('project-analyses', JSON.stringify(updatedProjects));
-            setProjects(updatedProjects);
         } catch (error) {
             console.error('Error saving projects to localStorage:', error);
         }
@@ -118,16 +120,24 @@ export default function DashboardPage() {
             progress: 0,
         };
 
-        // Agregar el proyecto al localStorage inmediatamente
+        // Agregar el proyecto al estado y localStorage inmediatamente
         const updatedProjects = [newProject, ...projects];
+        setProjects(updatedProjects);
         saveProjectsToStorage(updatedProjects);
+
+        // Limpiar el formulario inmediatamente para permitir más subidas
+        setProjectName('');
+        setSelectedFile(null);
+        const fileInput = document.getElementById('file-input') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        setUploading(false);
 
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('project_name', projectName.trim());
 
-            // Simular progreso mientras se sube
+            // Actualizar a processing
             updateProjectStatus(newProject.id, 'processing', 25);
 
             const response = await fetch(`${API_URL}/api/v1/analysis/project/upload`, {
@@ -144,13 +154,6 @@ export default function DashboardPage() {
         } catch (error) {
             console.error('Error uploading project:', error);
             updateProjectStatus(newProject.id, 'failed', 0);
-        } finally {
-            setUploading(false);
-            setProjectName('');
-            setSelectedFile(null);
-            // Reset file input
-            const fileInput = document.getElementById('file-input') as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
         }
     };
 
@@ -160,22 +163,32 @@ export default function DashboardPage() {
         progress: number,
         result?: Record<string, unknown>
     ) => {
-        const updatedProjects = projects.map(project => {
-            if (project.id === id) {
-                return {
-                    ...project,
-                    status,
-                    progress,
-                    result,
-                };
-            }
-            return project;
+        setProjects(prevProjects => {
+            const updatedProjects = prevProjects.map(project => {
+                if (project.id === id) {
+                    return {
+                        ...project,
+                        status,
+                        progress,
+                        result,
+                    };
+                }
+                return project;
+            });
+            saveProjectsToStorage(updatedProjects);
+            return updatedProjects;
         });
-        saveProjectsToStorage(updatedProjects);
     };
 
     const handleUploadClick = () => {
         handleUpload().catch(console.error);
+    };
+
+    const handleProjectClick = (project: ProjectAnalysis) => {
+        if (project.status === 'completed') {
+            setSelectedProject(project);
+            setModalOpen(true);
+        }
     };
 
     // Prevenir renderizado hasta que el componente se monte en el cliente
@@ -266,7 +279,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Projects List */}
+                {/* Projects Grid */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Proyectos Analizados</CardTitle>
@@ -281,25 +294,31 @@ export default function DashboardPage() {
                                 </p>
                             </div>
                         ) : (
-                            <div className='space-y-4'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                                 {projects.map(project => (
                                     <motion.div
                                         key={project.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
-                                        className='border rounded-lg p-4 hover:bg-gray-50 transition-colors'
+                                        className={`border rounded-lg p-4 transition-all ${project.status === 'completed'
+                                                ? 'hover:shadow-md cursor-pointer hover:bg-gray-50'
+                                                : 'bg-gray-50'
+                                            }`}
+                                        onClick={() => handleProjectClick(project)}
                                     >
                                         <div className='flex items-start justify-between mb-3'>
-                                            <div>
-                                                <h3 className='font-semibold text-gray-900 mb-1'>
+                                            <div className='flex-1 min-w-0'>
+                                                <h3 className='font-semibold text-gray-900 text-sm truncate'>
                                                     {project.projectName}
                                                 </h3>
-                                                <p className='text-sm text-gray-600'>
+                                                <p className='text-xs text-gray-600 mt-1'>
                                                     {project.fileName}
                                                 </p>
                                             </div>
-                                            <Badge className={getStatusColor(project.status)}>
+                                            <Badge
+                                                className={`${getStatusColor(project.status)} text-xs`}
+                                            >
                                                 {getStatusIcon(project.status)}
                                                 <span className='ml-1 capitalize'>
                                                     {project.status}
@@ -308,9 +327,8 @@ export default function DashboardPage() {
                                         </div>
 
                                         <div className='space-y-2'>
-                                            <div className='flex items-center justify-between text-sm'>
+                                            <div className='flex items-center justify-between text-xs'>
                                                 <span className='text-gray-600'>
-                                                    Subido:{' '}
                                                     {new Date(
                                                         project.uploadedAt
                                                     ).toLocaleDateString()}
@@ -319,17 +337,12 @@ export default function DashboardPage() {
                                                     {project.progress}%
                                                 </span>
                                             </div>
-                                            <Progress value={project.progress} className='h-2' />
+                                            <Progress value={project.progress} className='h-1' />
                                         </div>
 
-                                        {project.result && (
-                                            <div className='mt-3 p-3 bg-gray-50 rounded-lg'>
-                                                <p className='text-sm text-gray-700 font-medium mb-1'>
-                                                    Resultado:
-                                                </p>
-                                                <pre className='text-xs text-gray-600 whitespace-pre-wrap'>
-                                                    {JSON.stringify(project.result, null, 2)}
-                                                </pre>
+                                        {project.status === 'completed' && (
+                                            <div className='mt-3 text-xs text-gray-500'>
+                                                Click para ver detalles
                                             </div>
                                         )}
                                     </motion.div>
@@ -338,6 +351,35 @@ export default function DashboardPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Project Detail Modal */}
+                <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                    <DialogContent className='max-w-4xl max-h-[80vh] overflow-y-auto'>
+                        <DialogHeader>
+                            <DialogTitle className='flex items-center gap-2'>
+                                <FileText className='h-5 w-5' />
+                                {selectedProject?.projectName}
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {selectedProject && selectedProject.result && (
+                            <div className='space-y-6'>
+                                <div className='grid grid-cols-1 gap-4'>
+                                    <div>
+                                        <h3 className='font-semibold text-gray-900 mb-2'>
+                                            Resultado del Análisis
+                                        </h3>
+                                        <div className='bg-gray-50 p-4 rounded-lg'>
+                                            <pre className='text-sm text-gray-700 whitespace-pre-wrap'>
+                                                {JSON.stringify(selectedProject.result, null, 2)}
+                                            </pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
