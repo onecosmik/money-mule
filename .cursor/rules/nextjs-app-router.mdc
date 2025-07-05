@@ -1,0 +1,100 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Next.js 14+ App Router
+
+## App Directory Structure
+- Use app router structure
+- Use proper route groups with parentheses `(group)`
+- Use proper layout files for shared UI
+- Use proper loading/error files for better UX
+- Use proper metadata exports for SEO
+
+## Layout Patterns
+```typescript
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Page Title',
+    description: 'Page description',
+};
+
+export default function Layout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
+    return (
+        <div className="layout-container">
+            {children}
+        </div>
+    );
+}
+```
+
+## Page Components
+```typescript
+'use client'; // Only for client components
+
+import { Component } from '@/components/ui/component';
+
+export default function PageName() {
+    return (
+        <main className="page-container">
+            <Component />
+        </main>
+    );
+}
+```
+
+## Loading States
+```typescript
+export default function Loading() {
+    return (
+        <div className="loading-container">
+            <Skeleton className="h-8 w-32" />
+        </div>
+    );
+}
+```
+
+## Error Boundaries
+```typescript
+'use client';
+
+import { useEffect } from 'react';
+
+export default function Error({
+    error,
+    reset,
+}: {
+    error: Error & { digest?: string };
+    reset: () => void;
+}) {
+    useEffect(() => {
+        console.error(error);
+    }, [error]);
+
+    return (
+        <div className="error-container">
+            <h2>Something went wrong!</h2>
+            <button onClick={reset}>Try again</button>
+        </div>
+    );
+}
+```
+
+## Metadata and SEO
+- Export metadata from layout and page files
+- Use proper Open Graph tags
+- Use proper Twitter cards
+- Use proper structured data
+- Use proper canonical URLs
+
+## Route Groups
+- Use `(group)` for organizing routes without affecting URL structure
+- Use `[dynamic]` for dynamic routes
+- Use `[...catchAll]` for catch-all routes
+- Use `[[...optionalCatchAll]]` for optional catch-all routes

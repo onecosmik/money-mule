@@ -12,10 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 
-interface ProjectAnalysis {
+interface DocumentAnalysis {
     id: string;
-    projectName: string;
     fileName: string;
+    documentType?: string;
     status: 'pending' | 'processing' | 'completed' | 'failed';
     uploadedAt: string;
     progress: number;
@@ -25,7 +25,7 @@ interface ProjectAnalysis {
 // Configurar la URL de la API desde variables de entorno
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://moneymule.xyz';
 
-const getStatusColor = (status: ProjectAnalysis['status']) => {
+const getStatusColor = (status: DocumentAnalysis['status']) => {
     switch (status) {
         case 'completed':
             return 'bg-green-100 text-green-800';
@@ -40,7 +40,7 @@ const getStatusColor = (status: ProjectAnalysis['status']) => {
     }
 };
 
-const getStatusIcon = (status: ProjectAnalysis['status']) => {
+const getStatusIcon = (status: DocumentAnalysis['status']) => {
     switch (status) {
         case 'completed':
             return <CheckCircle className='h-4 w-4' />;
@@ -55,40 +55,51 @@ const getStatusIcon = (status: ProjectAnalysis['status']) => {
     }
 };
 
-export default function DashboardPage() {
-    const [projects, setProjects] = useState<ProjectAnalysis[]>([]);
+const detectDocumentType = (fileName: string): string => {
+    const name = fileName.toLowerCase();
+    if (name.includes('safe')) return 'SAFE';
+    if (name.includes('saft')) return 'SAFT';
+    if (name.includes('term sheet') || name.includes('termsheet')) return 'Term Sheet';
+    if (name.includes('cap table') || name.includes('captable')) return 'Cap Table';
+    if (name.includes('convertible')) return 'Convertible Note';
+    if (name.includes('agreement')) return 'Agreement';
+    if (name.includes('contract')) return 'Contract';
+    return 'Document';
+};
+
+export default function DocumentsPage() {
+    const [documents, setDocuments] = useState<DocumentAnalysis[]>([]);
     const [uploading, setUploading] = useState(false);
-    const [projectName, setProjectName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        loadProjectsFromStorage();
+        loadDocumentsFromStorage();
     }, []);
 
-    const loadProjectsFromStorage = () => {
+    const loadDocumentsFromStorage = () => {
         if (typeof window === 'undefined') return;
 
         try {
-            const stored = localStorage.getItem('project-analyses');
+            const stored = localStorage.getItem('document-analyses');
             if (stored) {
-                const parsedProjects = JSON.parse(stored) as ProjectAnalysis[];
-                setProjects(parsedProjects);
+                const parsedDocuments = JSON.parse(stored) as DocumentAnalysis[];
+                setDocuments(parsedDocuments);
             }
         } catch (error) {
-            console.error('Error loading projects from localStorage:', error);
+            console.error('Error loading documents from localStorage:', error);
         }
     };
 
-    const saveProjectsToStorage = (updatedProjects: ProjectAnalysis[]) => {
+    const saveDocumentsToStorage = (updatedDocuments: DocumentAnalysis[]) => {
         if (typeof window === 'undefined') return;
 
         try {
-            localStorage.setItem('project-analyses', JSON.stringify(updatedProjects));
-            setProjects(updatedProjects);
+            localStorage.setItem('document-analyses', JSON.stringify(updatedDocuments));
+            setDocuments(updatedDocuments);
         } catch (error) {
-            console.error('Error saving projects to localStorage:', error);
+            console.error('Error saving documents to localStorage:', error);
         }
     };
 
@@ -102,51 +113,49 @@ export default function DashboardPage() {
     };
 
     const handleUpload = async () => {
-        if (!selectedFile || !projectName.trim()) {
-            alert('Por favor selecciona un archivo y escribe el nombre del proyecto');
+        if (!selectedFile) {
+            alert('Por favor selecciona un archivo');
             return;
         }
 
         setUploading(true);
 
-        const newProject: ProjectAnalysis = {
+        const newDocument: DocumentAnalysis = {
             id: generateId(),
-            projectName: projectName.trim(),
             fileName: selectedFile.name,
+            documentType: detectDocumentType(selectedFile.name),
             status: 'pending',
             uploadedAt: new Date().toISOString(),
             progress: 0,
         };
 
-        // Agregar el proyecto al localStorage inmediatamente
-        const updatedProjects = [newProject, ...projects];
-        saveProjectsToStorage(updatedProjects);
+        // Agregar el documento al localStorage inmediatamente
+        const updatedDocuments = [newDocument, ...documents];
+        saveDocumentsToStorage(updatedDocuments);
 
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
-            formData.append('project_name', projectName.trim());
 
             // Simular progreso mientras se sube
-            updateProjectStatus(newProject.id, 'processing', 25);
+            updateDocumentStatus(newDocument.id, 'processing', 25);
 
-            const response = await fetch(`${API_URL}/api/v1/analysis/project/upload`, {
+            const response = await fetch(`${API_URL}/api/v1/analysis/document/analyze`, {
                 method: 'POST',
                 body: formData,
             });
 
             if (response.ok) {
                 const result = (await response.json()) as Record<string, unknown>;
-                updateProjectStatus(newProject.id, 'completed', 100, result);
+                updateDocumentStatus(newDocument.id, 'completed', 100, result);
             } else {
-                updateProjectStatus(newProject.id, 'failed', 0);
+                updateDocumentStatus(newDocument.id, 'failed', 0);
             }
         } catch (error) {
-            console.error('Error uploading project:', error);
-            updateProjectStatus(newProject.id, 'failed', 0);
+            console.error('Error uploading document:', error);
+            updateDocumentStatus(newDocument.id, 'failed', 0);
         } finally {
             setUploading(false);
-            setProjectName('');
             setSelectedFile(null);
             // Reset file input
             const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -154,24 +163,24 @@ export default function DashboardPage() {
         }
     };
 
-    const updateProjectStatus = (
+    const updateDocumentStatus = (
         id: string,
-        status: ProjectAnalysis['status'],
+        status: DocumentAnalysis['status'],
         progress: number,
         result?: Record<string, unknown>
     ) => {
-        const updatedProjects = projects.map(project => {
-            if (project.id === id) {
+        const updatedDocuments = documents.map(document => {
+            if (document.id === id) {
                 return {
-                    ...project,
+                    ...document,
                     status,
                     progress,
                     result,
                 };
             }
-            return project;
+            return document;
         });
-        saveProjectsToStorage(updatedProjects);
+        saveDocumentsToStorage(updatedDocuments);
     };
 
     const handleUploadClick = () => {
@@ -196,39 +205,70 @@ export default function DashboardPage() {
             <div className='container mx-auto px-4 py-8'>
                 {/* Header */}
                 <div className='mb-8'>
-                    <h1 className='text-3xl font-bold text-gray-900 mb-2'>Análisis de Proyectos</h1>
+                    <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+                        Análisis de Documentos
+                    </h1>
                     <p className='text-gray-600'>
-                        Sube tu deck y obtén un análisis detallado del proyecto
+                        Analiza documentos legales como SAFE, SAFT, Term Sheets, Cap Tables y más
                     </p>
                 </div>
+
+                {/* Document Types Info */}
+                <Card className='mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'>
+                    <CardHeader>
+                        <CardTitle className='text-lg'>Tipos de Documentos Soportados</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>SAFE</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>SAFT</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Term Sheet</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Cap Table</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Convertible Note</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Agreement</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Contract</span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <FileText className='h-4 w-4 text-blue-600' />
+                                <span>Otros</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Upload Form */}
                 <Card className='mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-green-200'>
                     <CardHeader>
                         <CardTitle className='flex items-center gap-2'>
                             <Upload className='h-5 w-5 text-green-600' />
-                            Subir Proyecto
+                            Subir Documento
                         </CardTitle>
-                        <CardDescription>
-                            Selecciona un archivo PDF y proporciona el nombre del proyecto
-                        </CardDescription>
+                        <CardDescription>Selecciona un archivo PDF para analizar</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className='space-y-4'>
                             <div>
-                                <Label htmlFor='project-name'>Nombre del Proyecto</Label>
-                                <Input
-                                    id='project-name'
-                                    type='text'
-                                    placeholder='Ej: Mi Startup SaaS'
-                                    value={projectName}
-                                    onChange={e => setProjectName(e.target.value)}
-                                    disabled={uploading}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor='file-input'>Archivo del Deck (PDF)</Label>
+                                <Label htmlFor='file-input'>Documento (PDF)</Label>
                                 <Input
                                     id='file-input'
                                     type='file'
@@ -239,21 +279,26 @@ export default function DashboardPage() {
                             </div>
 
                             {selectedFile && (
-                                <div className='text-sm text-gray-600'>
-                                    Archivo seleccionado: {selectedFile.name}
+                                <div className='space-y-2'>
+                                    <div className='text-sm text-gray-600'>
+                                        Archivo seleccionado: {selectedFile.name}
+                                    </div>
+                                    <div className='text-sm text-blue-600 font-medium'>
+                                        Tipo detectado: {detectDocumentType(selectedFile.name)}
+                                    </div>
                                 </div>
                             )}
 
                             <Button
                                 onClick={handleUploadClick}
-                                disabled={uploading || !selectedFile || !projectName.trim()}
+                                disabled={uploading || !selectedFile}
                                 className='bg-green-600 hover:bg-green-700 text-white'
                                 size='lg'
                             >
                                 {uploading ? (
                                     <>
                                         <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2' />
-                                        Subiendo...
+                                        Analizando...
                                     </>
                                 ) : (
                                     <>
@@ -266,25 +311,27 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Projects List */}
+                {/* Documents List */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Proyectos Analizados</CardTitle>
-                        <CardDescription>Historial de análisis realizados</CardDescription>
+                        <CardTitle>Documentos Analizados</CardTitle>
+                        <CardDescription>
+                            Historial de análisis de documentos legales
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {projects.length === 0 ? (
+                        {documents.length === 0 ? (
                             <div className='text-center py-8'>
                                 <FileText className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                                 <p className='text-gray-500'>
-                                    No tienes proyectos analizados aún. ¡Sube tu primer deck!
+                                    No tienes documentos analizados aún. ¡Sube tu primer documento!
                                 </p>
                             </div>
                         ) : (
                             <div className='space-y-4'>
-                                {projects.map(project => (
+                                {documents.map(document => (
                                     <motion.div
-                                        key={project.id}
+                                        key={document.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
@@ -293,16 +340,16 @@ export default function DashboardPage() {
                                         <div className='flex items-start justify-between mb-3'>
                                             <div>
                                                 <h3 className='font-semibold text-gray-900 mb-1'>
-                                                    {project.projectName}
+                                                    {document.fileName}
                                                 </h3>
-                                                <p className='text-sm text-gray-600'>
-                                                    {project.fileName}
+                                                <p className='text-sm text-blue-600 font-medium'>
+                                                    {document.documentType}
                                                 </p>
                                             </div>
-                                            <Badge className={getStatusColor(project.status)}>
-                                                {getStatusIcon(project.status)}
+                                            <Badge className={getStatusColor(document.status)}>
+                                                {getStatusIcon(document.status)}
                                                 <span className='ml-1 capitalize'>
-                                                    {project.status}
+                                                    {document.status}
                                                 </span>
                                             </Badge>
                                         </div>
@@ -312,23 +359,23 @@ export default function DashboardPage() {
                                                 <span className='text-gray-600'>
                                                     Subido:{' '}
                                                     {new Date(
-                                                        project.uploadedAt
+                                                        document.uploadedAt
                                                     ).toLocaleDateString()}
                                                 </span>
                                                 <span className='text-gray-900'>
-                                                    {project.progress}%
+                                                    {document.progress}%
                                                 </span>
                                             </div>
-                                            <Progress value={project.progress} className='h-2' />
+                                            <Progress value={document.progress} className='h-2' />
                                         </div>
 
-                                        {project.result && (
+                                        {document.result && (
                                             <div className='mt-3 p-3 bg-gray-50 rounded-lg'>
                                                 <p className='text-sm text-gray-700 font-medium mb-1'>
                                                     Resultado:
                                                 </p>
                                                 <pre className='text-xs text-gray-600 whitespace-pre-wrap'>
-                                                    {JSON.stringify(project.result, null, 2)}
+                                                    {JSON.stringify(document.result, null, 2)}
                                                 </pre>
                                             </div>
                                         )}

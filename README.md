@@ -56,11 +56,26 @@ Ready to pitch your tent?
     ```bash
     bun i
     ```
-3.  **Light the Fire:** Start the development server. 🔥
+3.  **Configure Environment:** Set up your environment variables. 🔧
+    Create a `.env.local` file in the root directory:
+
+    ```bash
+    NEXT_PUBLIC_API_URL=https://moneymule.xyz
+    ```
+
+    > **Note:** The application defaults to `https://moneymule.xyz` if no environment variable is set.
+
+4.  **Light the Fire:** Start the development server. 🔥
     ```bash
     bun run dev
     ```
-4.  **Scout the Area:** Open [http://localhost:3000](http://localhost:3000) in your browser. 👀
+5.  **Scout the Area:** Open [http://localhost:3000](http://localhost:3000) in your browser. 👀
+
+## Environment Variables 🔧
+
+The application uses the following environment variables:
+
+- `NEXT_PUBLIC_API_URL`: The base URL for the Money Mule API (defaults to `https://moneymule.xyz`)
 
 ## Containerized Expeditions: Docker 🐳
 

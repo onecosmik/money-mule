@@ -1,0 +1,80 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Development Workflow
+
+## Tools & Scripts
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run lint` - Run ESLint
+- `bun run lint:fix` - Fix ESLint issues
+- `bun run format` - Format with Prettier
+- `bun run pre-push` - Run all checks before push
+
+## ESLint Rules to Follow
+- No console.log (use console.warn/error instead)
+- No unused imports or variables
+- Use proper import sorting
+- Use proper naming conventions
+- Use proper React hooks rules
+- Use proper accessibility rules
+- Use proper TypeScript rules
+
+## Error Handling
+- Use try-catch blocks for async operations
+- Use proper error boundaries
+- Use toast notifications for user feedback
+- Use proper error logging
+
+## Testing
+- Write unit tests for components
+- Write integration tests for pages
+- Use proper test naming conventions
+- Use proper test organization
+- Use proper mocking strategies
+
+## Documentation
+- Use JSDoc comments for complex functions
+- Use proper README documentation
+- Use proper component documentation
+- Use proper API documentation
+- Use proper inline comments
+
+## Git & Version Control
+- Use conventional commit messages
+- Use proper branch naming
+- Use proper PR descriptions
+- Use proper code review practices
+- Use proper commit hooks
+
+## Environment Setup
+- Use Node.js 18+
+- Use Bun as package manager
+- Use VS Code with recommended extensions
+- Use proper environment variables
+- Use proper development tools
+
+## Common Patterns to Avoid
+- Don't use `any` type
+- Don't use `console.log` in production
+- Don't use inline styles
+- Don't use deprecated React patterns
+- Don't use unsafe HTML injection
+- Don't use hardcoded values
+- Don't use magic numbers
+- Don't use deeply nested conditionals
+- Don't use overly complex functions
+- Don't use inconsistent naming
+
+## Code Review Checklist
+- [ ] Code follows TypeScript best practices
+- [ ] Code follows React best practices
+- [ ] Code follows ESLint rules
+- [ ] Code follows Prettier formatting
+- [ ] Code follows accessibility guidelines
+- [ ] Code follows performance guidelines
+- [ ] Code follows security guidelines
+- [ ] Code follows testing guidelines
+- [ ] Code follows documentation guidelines

@@ -1,0 +1,60 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Security & Performance
+
+## Security Best Practices
+- Use proper input validation
+- Use proper output sanitization
+- Use proper authentication/authorization
+- Use proper HTTPS/SSL
+- Use proper environment variables
+- Use proper CORS configuration
+- Use proper Content Security Policy
+- Use proper rate limiting
+- Use proper session management
+- Use proper password hashing
+
+## Performance Optimization
+- Use proper image optimization
+- Use proper code splitting
+- Use proper caching strategies
+- Use proper bundle optimization
+- Use proper lazy loading
+- Use proper memoization
+- Use proper virtualization for large lists
+- Use proper preloading strategies
+- Use proper service workers
+- Use proper CDN configuration
+
+## Monitoring & Logging
+- Use proper error tracking
+- Use proper performance monitoring
+- Use proper analytics
+- Use proper logging levels
+- Use proper health checks
+- Use proper metrics collection
+- Use proper alerting systems
+- Use proper debugging tools
+
+## Dependencies & Imports
+- Use specific imports from libraries
+- Use barrel exports for internal modules
+- Use proper import aliases
+- Avoid circular dependencies
+- Keep dependencies up to date
+- Use proper dependency analysis
+- Use proper tree shaking
+- Use proper bundle analysis
+
+## Deployment
+- Use proper CI/CD pipeline
+- Use proper environment configuration
+- Use proper build optimization
+- Use proper monitoring setup
+- Use proper backup strategies
+- Use proper rollback procedures
+- Use proper health monitoring
+- Use proper scaling strategies

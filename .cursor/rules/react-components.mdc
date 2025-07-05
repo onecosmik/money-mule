@@ -3,3 +3,59 @@ description:
 globs:
 alwaysApply: false
 ---
+# React & JSX Patterns
+
+## Component Structure
+- Use functional components with arrow functions or function declarations
+- Use `React.forwardRef` for components that need ref forwarding
+- Always include `displayName` for forwardRef components
+- Use `'use client'` directive for client components
+- Use `Readonly<T>` for props interfaces
+- Use proper TypeScript types for event handlers
+- Prefer destructuring props in function parameters
+- Export components as named exports
+- Use `interface` for component props (not `type`)
+- Extend HTML element interfaces when appropriate
+
+## Component Props Interface
+```typescript
+export interface ComponentNameProps
+    extends React.HTMLAttributes<HTMLDivElement> {
+    // custom props
+}
+```
+
+## ForwardRef Component
+```typescript
+const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
+    ({ className, ...props }, ref) => {
+        return (
+            <div
+                className={cn('base-classes', className)}
+                ref={ref}
+                {...props}
+            />
+        );
+    }
+);
+ComponentName.displayName = 'ComponentName';
+```
+
+## State Management
+- Use React hooks (useState, useEffect, etc.)
+- Use proper dependency arrays in useEffect
+- Use useCallback for memoized functions
+- Use useMemo for expensive calculations
+
+## Performance
+- Use React.memo for expensive components
+- Use proper key props in lists
+- Avoid inline object/function creation in render
+- Use proper lazy loading for routes
+
+## Accessibility
+- Use proper ARIA attributes
+- Use semantic HTML elements
+- Use proper focus management
+- Use proper color contrast
+- Use proper keyboard navigation
