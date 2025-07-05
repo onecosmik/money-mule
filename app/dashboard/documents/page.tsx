@@ -1,13 +1,23 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Clock, FileText, Upload, XCircle } from 'lucide-react';
+import {
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    FileText,
+    Info,
+    Shield,
+    Upload,
+    XCircle,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { DashboardNav } from '@/app/components/navigation/DashboardNav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -19,11 +29,19 @@ interface DocumentAnalysis {
     status: 'pending' | 'processing' | 'completed' | 'failed';
     uploadedAt: string;
     progress: number;
-    result?: Record<string, unknown>;
+    result?: {
+        document_type?: string;
+        score?: number;
+        risk_summary?: {
+            critical?: string[];
+            medium?: string[];
+            low?: string[];
+        };
+    };
 }
 
 // Configurar la URL de la API desde variables de entorno
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://moneymule.xyz';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend.moneymule.xyz';
 
 const getStatusColor = (status: DocumentAnalysis['status']) => {
     switch (status) {
@@ -55,6 +73,13 @@ const getStatusIcon = (status: DocumentAnalysis['status']) => {
     }
 };
 
+const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    if (score >= 40) return 'text-orange-600';
+    return 'text-red-600';
+};
+
 const detectDocumentType = (fileName: string): string => {
     const name = fileName.toLowerCase();
     if (name.includes('safe')) return 'SAFE';
@@ -72,6 +97,8 @@ export default function DocumentsPage() {
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [selectedDocument, setSelectedDocument] = useState<DocumentAnalysis | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -97,7 +124,6 @@ export default function DocumentsPage() {
 
         try {
             localStorage.setItem('document-analyses', JSON.stringify(updatedDocuments));
-            setDocuments(updatedDocuments);
         } catch (error) {
             console.error('Error saving documents to localStorage:', error);
         }
@@ -129,15 +155,22 @@ export default function DocumentsPage() {
             progress: 0,
         };
 
-        // Agregar el documento al localStorage inmediatamente
+        // Agregar el documento al estado y localStorage inmediatamente
         const updatedDocuments = [newDocument, ...documents];
+        setDocuments(updatedDocuments);
         saveDocumentsToStorage(updatedDocuments);
+
+        // Limpiar el formulario inmediatamente para permitir más subidas
+        setSelectedFile(null);
+        const fileInput = document.getElementById('file-input') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        setUploading(false);
 
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
 
-            // Simular progreso mientras se sube
+            // Actualizar a processing
             updateDocumentStatus(newDocument.id, 'processing', 25);
 
             const response = await fetch(`${API_URL}/api/v1/analysis/document/analyze`, {
@@ -146,7 +179,7 @@ export default function DocumentsPage() {
             });
 
             if (response.ok) {
-                const result = (await response.json()) as Record<string, unknown>;
+                const result = await response.json();
                 updateDocumentStatus(newDocument.id, 'completed', 100, result);
             } else {
                 updateDocumentStatus(newDocument.id, 'failed', 0);
@@ -154,12 +187,6 @@ export default function DocumentsPage() {
         } catch (error) {
             console.error('Error uploading document:', error);
             updateDocumentStatus(newDocument.id, 'failed', 0);
-        } finally {
-            setUploading(false);
-            setSelectedFile(null);
-            // Reset file input
-            const fileInput = document.getElementById('file-input') as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
         }
     };
 
@@ -167,24 +194,34 @@ export default function DocumentsPage() {
         id: string,
         status: DocumentAnalysis['status'],
         progress: number,
-        result?: Record<string, unknown>
+        result?: any
     ) => {
-        const updatedDocuments = documents.map(document => {
-            if (document.id === id) {
-                return {
-                    ...document,
-                    status,
-                    progress,
-                    result,
-                };
-            }
-            return document;
+        setDocuments(prevDocuments => {
+            const updatedDocuments = prevDocuments.map(document => {
+                if (document.id === id) {
+                    return {
+                        ...document,
+                        status,
+                        progress,
+                        result,
+                    };
+                }
+                return document;
+            });
+            saveDocumentsToStorage(updatedDocuments);
+            return updatedDocuments;
         });
-        saveDocumentsToStorage(updatedDocuments);
     };
 
     const handleUploadClick = () => {
         handleUpload().catch(console.error);
+    };
+
+    const handleDocumentClick = (document: DocumentAnalysis) => {
+        if (document.status === 'completed') {
+            setSelectedDocument(document);
+            setModalOpen(true);
+        }
     };
 
     // Prevenir renderizado hasta que el componente se monte en el cliente
@@ -298,7 +335,7 @@ export default function DocumentsPage() {
                                 {uploading ? (
                                     <>
                                         <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2' />
-                                        Analizando...
+                                        Subiendo...
                                     </>
                                 ) : (
                                     <>
@@ -311,7 +348,7 @@ export default function DocumentsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Documents List */}
+                {/* Documents Grid */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Documentos Analizados</CardTitle>
@@ -328,25 +365,32 @@ export default function DocumentsPage() {
                                 </p>
                             </div>
                         ) : (
-                            <div className='space-y-4'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                                 {documents.map(document => (
                                     <motion.div
                                         key={document.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
-                                        className='border rounded-lg p-4 hover:bg-gray-50 transition-colors'
+                                        className={`border rounded-lg p-4 transition-all ${document.status === 'completed'
+                                                ? 'hover:shadow-md cursor-pointer hover:bg-gray-50'
+                                                : 'bg-gray-50'
+                                            }`}
+                                        onClick={() => handleDocumentClick(document)}
                                     >
                                         <div className='flex items-start justify-between mb-3'>
-                                            <div>
-                                                <h3 className='font-semibold text-gray-900 mb-1'>
+                                            <div className='flex-1 min-w-0'>
+                                                <h3 className='font-semibold text-gray-900 text-sm truncate'>
                                                     {document.fileName}
                                                 </h3>
-                                                <p className='text-sm text-blue-600 font-medium'>
-                                                    {document.documentType}
+                                                <p className='text-xs text-blue-600 font-medium mt-1'>
+                                                    {document.result?.document_type ||
+                                                        document.documentType}
                                                 </p>
                                             </div>
-                                            <Badge className={getStatusColor(document.status)}>
+                                            <Badge
+                                                className={`${getStatusColor(document.status)} text-xs`}
+                                            >
                                                 {getStatusIcon(document.status)}
                                                 <span className='ml-1 capitalize'>
                                                     {document.status}
@@ -354,10 +398,25 @@ export default function DocumentsPage() {
                                             </Badge>
                                         </div>
 
+                                        {document.status === 'completed' &&
+                                            document.result?.score && (
+                                                <div className='mb-3'>
+                                                    <div className='flex items-center justify-between text-sm'>
+                                                        <span className='text-gray-600'>
+                                                            Score:
+                                                        </span>
+                                                        <span
+                                                            className={`font-bold ${getScoreColor(document.result.score)}`}
+                                                        >
+                                                            {document.result.score}/100
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                         <div className='space-y-2'>
-                                            <div className='flex items-center justify-between text-sm'>
+                                            <div className='flex items-center justify-between text-xs'>
                                                 <span className='text-gray-600'>
-                                                    Subido:{' '}
                                                     {new Date(
                                                         document.uploadedAt
                                                     ).toLocaleDateString()}
@@ -366,17 +425,12 @@ export default function DocumentsPage() {
                                                     {document.progress}%
                                                 </span>
                                             </div>
-                                            <Progress value={document.progress} className='h-2' />
+                                            <Progress value={document.progress} className='h-1' />
                                         </div>
 
-                                        {document.result && (
-                                            <div className='mt-3 p-3 bg-gray-50 rounded-lg'>
-                                                <p className='text-sm text-gray-700 font-medium mb-1'>
-                                                    Resultado:
-                                                </p>
-                                                <pre className='text-xs text-gray-600 whitespace-pre-wrap'>
-                                                    {JSON.stringify(document.result, null, 2)}
-                                                </pre>
+                                        {document.status === 'completed' && (
+                                            <div className='mt-3 text-xs text-gray-500'>
+                                                Click para ver detalles
                                             </div>
                                         )}
                                     </motion.div>
@@ -385,6 +439,155 @@ export default function DocumentsPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Document Detail Modal */}
+                <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                    <DialogContent className='max-w-4xl max-h-[80vh] overflow-y-auto'>
+                        <DialogHeader>
+                            <DialogTitle className='flex items-center gap-2'>
+                                <FileText className='h-5 w-5' />
+                                {selectedDocument?.fileName}
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {selectedDocument && selectedDocument.result && (
+                            <div className='space-y-6'>
+                                {/* Header Info */}
+                                <div className='grid grid-cols-2 gap-4'>
+                                    <div>
+                                        <h3 className='font-semibold text-gray-900'>
+                                            Tipo de Documento
+                                        </h3>
+                                        <p className='text-blue-600 font-medium'>
+                                            {selectedDocument.result.document_type ||
+                                                selectedDocument.documentType}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h3 className='font-semibold text-gray-900'>
+                                            Score de Riesgo
+                                        </h3>
+                                        <p
+                                            className={`text-xl font-bold ${getScoreColor(selectedDocument.result.score || 0)}`}
+                                        >
+                                            {selectedDocument.result.score || 0}/100
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Risk Summary */}
+                                {selectedDocument.result.risk_summary && (
+                                    <div className='space-y-4'>
+                                        <h3 className='font-semibold text-gray-900'>
+                                            Resumen de Riesgos
+                                        </h3>
+
+                                        {/* Critical Risks */}
+                                        {selectedDocument.result.risk_summary.critical &&
+                                            selectedDocument.result.risk_summary.critical.length >
+                                            0 && (
+                                                <div className='space-y-2'>
+                                                    <h4 className='flex items-center gap-2 font-medium text-red-600'>
+                                                        <AlertTriangle className='h-4 w-4' />
+                                                        Críticos (
+                                                        {
+                                                            selectedDocument.result.risk_summary
+                                                                .critical.length
+                                                        }
+                                                        )
+                                                    </h4>
+                                                    <ul className='space-y-1 text-sm'>
+                                                        {selectedDocument.result.risk_summary.critical.map(
+                                                            (risk, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    className='flex items-start gap-2'
+                                                                >
+                                                                    <span className='text-red-500 mt-1'>
+                                                                        •
+                                                                    </span>
+                                                                    <span className='text-gray-700'>
+                                                                        {risk}
+                                                                    </span>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                        {/* Medium Risks */}
+                                        {selectedDocument.result.risk_summary.medium &&
+                                            selectedDocument.result.risk_summary.medium.length >
+                                            0 && (
+                                                <div className='space-y-2'>
+                                                    <h4 className='flex items-center gap-2 font-medium text-yellow-600'>
+                                                        <Shield className='h-4 w-4' />
+                                                        Medios (
+                                                        {
+                                                            selectedDocument.result.risk_summary
+                                                                .medium.length
+                                                        }
+                                                        )
+                                                    </h4>
+                                                    <ul className='space-y-1 text-sm'>
+                                                        {selectedDocument.result.risk_summary.medium.map(
+                                                            (risk, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    className='flex items-start gap-2'
+                                                                >
+                                                                    <span className='text-yellow-500 mt-1'>
+                                                                        •
+                                                                    </span>
+                                                                    <span className='text-gray-700'>
+                                                                        {risk}
+                                                                    </span>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                        {/* Low Risks */}
+                                        {selectedDocument.result.risk_summary.low &&
+                                            selectedDocument.result.risk_summary.low.length > 0 && (
+                                                <div className='space-y-2'>
+                                                    <h4 className='flex items-center gap-2 font-medium text-green-600'>
+                                                        <Info className='h-4 w-4' />
+                                                        Bajos (
+                                                        {
+                                                            selectedDocument.result.risk_summary.low
+                                                                .length
+                                                        }
+                                                        )
+                                                    </h4>
+                                                    <ul className='space-y-1 text-sm'>
+                                                        {selectedDocument.result.risk_summary.low.map(
+                                                            (risk, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    className='flex items-start gap-2'
+                                                                >
+                                                                    <span className='text-green-500 mt-1'>
+                                                                        •
+                                                                    </span>
+                                                                    <span className='text-gray-700'>
+                                                                        {risk}
+                                                                    </span>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

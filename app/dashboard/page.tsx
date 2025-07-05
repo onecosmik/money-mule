@@ -23,7 +23,7 @@ interface ProjectAnalysis {
 }
 
 // Configurar la URL de la API desde variables de entorno
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://moneymule.xyz';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend.moneymule.xyz';
 
 const getStatusColor = (status: ProjectAnalysis['status']) => {
     switch (status) {

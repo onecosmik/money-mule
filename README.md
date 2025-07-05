@@ -60,10 +60,10 @@ Ready to pitch your tent?
     Create a `.env.local` file in the root directory:
 
     ```bash
-    NEXT_PUBLIC_API_URL=https://moneymule.xyz
+    NEXT_PUBLIC_API_URL=https://backend.moneymule.xyz
     ```
 
-    > **Note:** The application defaults to `https://moneymule.xyz` if no environment variable is set.
+    > **Note:** The application defaults to `https://backend.moneymule.xyz` if no environment variable is set.
 
 4.  **Light the Fire:** Start the development server. 🔥
     ```bash
@@ -75,7 +75,7 @@ Ready to pitch your tent?
 
 The application uses the following environment variables:
 
-- `NEXT_PUBLIC_API_URL`: The base URL for the Money Mule API (defaults to `https://moneymule.xyz`)
+- `NEXT_PUBLIC_API_URL`: The base URL for the Money Mule API (defaults to `https://backend.moneymule.xyz`)
 
 ## Containerized Expeditions: Docker 🐳
 
