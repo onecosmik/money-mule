@@ -2,7 +2,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { CalendarDays, DollarSign, Globe, Image, Plus, Trash2, User, Wallet } from 'lucide-react';
+import {
+    ArrowLeft,
+    CalendarDays,
+    DollarSign,
+    Globe,
+    Image,
+    Plus,
+    Trash2,
+    User,
+    Wallet,
+} from 'lucide-react';
+import Link from 'next/link';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -105,6 +116,18 @@ export default function FundProjectPage() {
                     variants={fadeInUp}
                 >
                     <div className='text-center mb-8'>
+                        <div className='flex justify-center mb-4'>
+                            <Link href='/dashboard/projects'>
+                                <Button
+                                    variant='ghost'
+                                    size='lg'
+                                    className='border-gray-200 hover:bg-gray-50 hover:border-gray-400 text-gray-700 px-6 py-2 text-base font-semibold flex items-center gap-2'
+                                >
+                                    <ArrowLeft className='h-5 w-5' />
+                                    Back to Projects
+                                </Button>
+                            </Link>
+                        </div>
                         <h1 className='text-3xl sm:text-4xl md:text-5xl font-bold mb-4 leading-tight'>
                             Fund Your Project
                         </h1>

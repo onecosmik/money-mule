@@ -2,7 +2,7 @@ import MillionLint from '@million/lint';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['via.placeholder.com'],
+        domains: ['via.placeholder.com', 'files.invicta.capital'],
     },
 };
 export default MillionLint.next({

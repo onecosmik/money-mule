@@ -1,7 +1,8 @@
 'use client';
 
 import { useConnectWallet, usePrivy, useWallets } from '@privy-io/react-auth';
-import { BarChart3, FileText, LogOut, TrendingUp, Wallet } from 'lucide-react';
+import { FileText, Heart, LogOut, TrendingUp, Wallet } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
@@ -68,7 +69,12 @@ export function DashboardNav() {
             <nav className='bg-white border-b border-gray-200 px-4 py-3'>
                 <div className='container mx-auto flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
-                        <BarChart3 className='h-6 w-6 text-green-600' />
+                        <Image
+                            src='https://files.invicta.capital/u/mule_1260.svg'
+                            alt='Money Mule Logo'
+                            width={24}
+                            height={24}
+                        />
                         <span className='font-semibold text-gray-900'>Money Mule</span>
                     </div>
                     <div className='flex items-center gap-4'>
@@ -88,7 +94,12 @@ function DashboardNavContent({ pathname }: { pathname: string }) {
         <nav className='bg-white border-b border-gray-200 px-4 py-3'>
             <div className='container mx-auto flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
-                    <BarChart3 className='h-6 w-6 text-green-600' />
+                    <Image
+                        src='https://files.invicta.capital/u/mule_1260.svg'
+                        alt='Money Mule Logo'
+                        width={24}
+                        height={24}
+                    />
                     <span className='font-semibold text-gray-900'>Money Mule</span>
                 </div>
 
@@ -121,7 +132,7 @@ function DashboardNavContent({ pathname }: { pathname: string }) {
                             size='sm'
                             className='flex items-center gap-2'
                         >
-                            <FileText className='h-4 w-4' />
+                            <Heart className='h-4 w-4' />
                             Fund projects
                         </Button>
                     </Link>
