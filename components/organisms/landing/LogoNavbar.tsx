@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export function LogoNavbar() {
     return (
-        <nav className='w-full flex items-center justify-center px-12 py-3 bg-green-50'>
+        <nav className='relative z-50 mt-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <Image
                 src='/logo.svg'
                 alt='MoneyMule Logo'

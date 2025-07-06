@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { ArrowRight, Check, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -9,90 +10,191 @@ const fadeInUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
 };
 
+const staggerChildren = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.15,
+        },
+    },
+};
+
 export function PricingSection() {
+    const plans = [
+        {
+            name: 'Starter',
+            description: 'Perfect for occasional investors',
+            price: '$25',
+            period: 'per analysis',
+            popular: false,
+            features: ['Single investment analysis', 'Basic founder scoring', 'Document review'],
+            buttonText: 'Get Started',
+            buttonVariant: 'outline' as const,
+        },
+        {
+            name: 'Professional',
+            description: 'Best for active investors',
+            price: '$99',
+            period: 'per month',
+            popular: true,
+            features: [
+                'Unlimited deck analyses',
+                'Unlimited document analyses',
+                'Priority access to deals',
+                'Advanced AI insights',
+                'Priority support',
+            ],
+            buttonText: 'Start Free Trial',
+            buttonVariant: 'default' as const,
+        },
+        {
+            name: 'Enterprise',
+            description: 'For institutional investors',
+            price: 'Custom',
+            period: 'pricing',
+            popular: false,
+            features: [
+                'Everything in Professional',
+                'Custom integrations or reports',
+                'Multi-user dashboard',
+                'Advanced analytics',
+                'Dedicated support',
+            ],
+            buttonText: 'Contact Sales',
+            buttonVariant: 'outline' as const,
+        },
+    ];
+
     return (
-        <motion.section
-            className='w-full max-w-7xl px-2 sm:px-4 py-10 md:py-16'
-            initial='hidden'
-            whileInView='visible'
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeInUp}
-        >
-            <h2 className='text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2'>
-                Flexible Pricing Models
-            </h2>
-            <p className='text-center text-base sm:text-lg md:text-xl mb-8'>
-                Choose the pricing model that works best for your investment strategy
-            </p>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <section id='pricing' className='w-full bg-white py-20 lg:py-32'>
+            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                 <motion.div
-                    variants={fadeInUp}
+                    className='text-center mb-16'
                     initial='hidden'
                     whileInView='visible'
                     viewport={{ once: true, amount: 0.3 }}
-                    className='h-full'
+                    variants={fadeInUp}
                 >
-                    <Card className='border-green-200 h-full'>
-                        <CardHeader>
-                            <CardTitle>Subscription</CardTitle>
-                            <CardDescription>
-                                Monthly or annual plans for regular users
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className='text-3xl font-bold mb-2'>$99/mo</div>
-                            <div className='mb-4'>Unlimited access to all features</div>
-                            <Link href='/dashboard'>
-                                <Button className='w-full'>Start Free Trial</Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
+                    <div className='inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-4'>
+                        <Zap className='w-4 h-4 mr-2' />
+                        Flexible Pricing
+                    </div>
+                    <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6'>
+                        Choose Your
+                        <span className='text-green-600 block'>Investment Workflow</span>
+                    </h2>
+                    <p className='text-xl text-gray-600 max-w-3xl mx-auto'>
+                        Flexible pricing models designed to streamline your investment processes.
+                        Start free and scale as you succeed.
+                    </p>
                 </motion.div>
+
+                {/* Main Pricing Cards */}
                 <motion.div
-                    variants={fadeInUp}
+                    className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-0 items-stretch'
                     initial='hidden'
                     whileInView='visible'
                     viewport={{ once: true, amount: 0.3 }}
-                    className='h-full'
+                    variants={staggerChildren}
                 >
-                    <Card className='border-green-400 h-full'>
-                        <CardHeader>
-                            <CardTitle>Pay Per Use</CardTitle>
-                            <CardDescription>Perfect for occasional investors</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className='text-3xl font-bold mb-2'>$25</div>
-                            <div className='mb-4'>Per investment analysis</div>
-                            <Link href='/dashboard'>
-                                <Button className='w-full' variant='outline'>
-                                    Get Started
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
+                    {plans.map(plan => (
+                        <motion.div
+                            key={plan.name}
+                            variants={fadeInUp}
+                            className='relative flex flex-col h-full'
+                        >
+                            {plan.popular && (
+                                <div
+                                    className='absolute left-1/2 z-20'
+                                    style={{
+                                        top: '0px',
+                                        transform: 'translate(-50%, -50%)',
+                                        pointerEvents: 'none',
+                                    }}
+                                >
+                                    <div className='inline-flex items-center px-4 py-2 rounded-full bg-green-600 text-white text-sm font-medium shadow-lg'>
+                                        <Star className='w-4 h-4 mr-1' />
+                                        Most Popular
+                                    </div>
+                                </div>
+                            )}
+                            <Card className='flex flex-col justify-between h-full min-h-[520px] border-gray-200 hover:border-green-300 transition-all duration-300 hover:shadow-lg relative'>
+                                <CardHeader className='text-center pb-8'>
+                                    <CardTitle className='text-2xl font-bold text-gray-900'>
+                                        {plan.name}
+                                    </CardTitle>
+                                    <CardDescription className='text-gray-600 mt-2'>
+                                        {plan.description}
+                                    </CardDescription>
+                                    <div className='mt-6'>
+                                        <div className='flex items-baseline justify-center'>
+                                            <span className='text-4xl font-bold text-gray-900'>
+                                                {plan.price}
+                                            </span>
+                                            <span className='text-gray-600 ml-2'>
+                                                {plan.period}
+                                            </span>
+                                        </div>
+                                        {plan.name === 'Professional' && (
+                                            <p className='text-sm text-green-600 mt-2 font-medium'>
+                                                14-day free trial
+                                            </p>
+                                        )}
+                                    </div>
+                                </CardHeader>
+                                <CardContent className='pt-0 flex flex-col flex-1 justify-between'>
+                                    <ul className='space-y-3 mb-8'>
+                                        {plan.features.map(feature => (
+                                            <li key={feature} className='flex items-center'>
+                                                <Check className='w-5 h-5 text-green-600 mr-3 flex-shrink-0' />
+                                                <span className='text-gray-700'>{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className='mt-auto'>
+                                        <Link href='/dashboard'>
+                                            <Button
+                                                variant={plan.buttonVariant}
+                                                size='lg'
+                                                className={`w-full ${
+                                                    plan.popular
+                                                        ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
+                                                        : 'border-green-600 text-green-700 hover:bg-green-50'
+                                                } flex items-center justify-center gap-2`}
+                                            >
+                                                {plan.buttonText}
+                                                <ArrowRight className='w-4 h-4' />
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
                 </motion.div>
+
+                {/* FAQ or Additional Info */}
                 <motion.div
-                    variants={fadeInUp}
+                    className='text-center mt-16'
                     initial='hidden'
                     whileInView='visible'
                     viewport={{ once: true, amount: 0.3 }}
-                    className='h-full'
+                    variants={fadeInUp}
                 >
-                    <Card className='border-green-200 h-full'>
-                        <CardHeader>
-                            <CardTitle>Success Fee</CardTitle>
-                            <CardDescription>Pay only when investments succeed</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className='text-3xl font-bold mb-2'>2-5%</div>
-                            <div className='mb-4'>Of successful investment returns</div>
-                            <Link href='/dashboard'>
-                                <Button className='w-full'>Contact Sales</Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
+                    <p className='text-gray-600 mb-4'>
+                        Need a custom plan? Enterprise pricing available for teams and institutions.
+                    </p>
+                    <Link href='/dashboard'>
+                        <Button
+                            variant='ghost'
+                            className='text-green-600 hover:text-green-700 hover:bg-green-50'
+                        >
+                            Contact our sales team →
+                        </Button>
+                    </Link>
                 </motion.div>
             </div>
-        </motion.section>
+        </section>
     );
 }
