@@ -17,14 +17,7 @@ const formatAddress = (address: string) => {
 
 function WalletButton() {
     const { wallets } = useWallets();
-    const { connectWallet } = useConnectWallet({
-        onSuccess: ({ wallet }) => {
-            console.log('Wallet connected:', wallet);
-        },
-        onError: error => {
-            console.log('Connection error:', error);
-        },
-    });
+    const { connectWallet } = useConnectWallet();
 
     const handleConnectWallet = useCallback(() => {
         if (connectWallet && typeof connectWallet === 'function') {
@@ -111,7 +104,7 @@ function DashboardNavContent({ pathname }: { pathname: string }) {
                             className='flex items-center gap-2'
                         >
                             <TrendingUp className='h-4 w-4' />
-                            Decks / WhitePapers
+                            Analyze Projects
                         </Button>
                     </Link>
 

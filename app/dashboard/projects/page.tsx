@@ -1,7 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CalendarDays, DollarSign, Globe, Plus, TrendingUp, User, Wallet } from 'lucide-react';
+import {
+    CalendarDays,
+    DollarSign,
+    Globe,
+    Plus,
+    Target,
+    TrendingUp,
+    User,
+    Wallet,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -200,9 +209,11 @@ export default function ProjectsPage() {
                                 <Link href={`/dashboard/projects/${project.founderAddress}`}>
                                     <Card className='h-full border-green-200 hover:border-green-400 transition-colors duration-200 cursor-pointer hover:shadow-lg'>
                                         <div className='relative'>
-                                            <img
+                                            <Image
                                                 src={project.coverImage}
                                                 alt={project.name}
+                                                width={400}
+                                                height={200}
                                                 className='w-full h-48 object-cover rounded-t-lg'
                                             />
                                             <div className='absolute top-4 right-4'>
@@ -225,6 +236,23 @@ export default function ProjectsPage() {
                                                 {project.description}
                                             </CardDescription>
                                         </CardHeader>
+
+                                        <div className='px-6 pb-4'>
+                                            <div className='flex items-center gap-2 mb-2'>
+                                                <Target className='h-4 w-4 text-green-600' />
+                                                <span className='text-sm font-medium text-gray-700'>
+                                                    Viability Score
+                                                </span>
+                                            </div>
+                                            <div className='flex items-center gap-2'>
+                                                <span
+                                                    className={`text-2xl font-bold ${getViabilityColor(project.viabilityScore || 75)}`}
+                                                >
+                                                    {project.viabilityScore || 75}
+                                                </span>
+                                                <span className='text-sm text-gray-500'>/100</span>
+                                            </div>
+                                        </div>
 
                                         <CardContent className='pt-0'>
                                             <div className='space-y-4'>
