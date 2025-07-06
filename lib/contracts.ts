@@ -385,12 +385,9 @@ export async function verifyFactoryContract(provider: ethers.Provider): Promise<
     try {
         const factory = getFactoryContract(provider);
 
-        // Try to call a simple view function to verify the contract exists
-        const nextRoundId = (await factory.getNextRoundId()) as bigint;
-        console.log('Contract verification successful. Next round ID:', nextRoundId.toString());
+        await factory.getNextRoundId();
         return true;
     } catch (error) {
-        console.error('Contract verification failed:', error);
         return false;
     }
 }
@@ -403,7 +400,6 @@ export async function isContract(provider: ethers.Provider, address: string): Pr
         const code = await provider.getCode(address);
         return code !== '0x';
     } catch (error) {
-        console.error('Error checking if address is contract:', error);
         return false;
     }
 }
@@ -418,10 +414,8 @@ export async function isAuthorizedJuror(
     try {
         const factory = getFactoryContract(provider);
         const isAuthorized = (await factory.isAuthorizedJuror(jurorAddress)) as boolean;
-        console.log(`Juror ${jurorAddress} is authorized:`, isAuthorized);
         return isAuthorized;
     } catch (error) {
-        console.error('Error checking juror authorization:', error);
         return false;
     }
 }
@@ -432,7 +426,6 @@ export async function isAuthorizedJuror(
 export function getAuthorizedJuryAddresses(): [string, string, string] {
     // Use the first authorized address from the constants
     const authorizedAddress = '0xa6e4e006EeD9fEA0C378A42d32a033F4B4f4A15b';
-    console.log(`Using authorized jury address: ${authorizedAddress}`);
     return [authorizedAddress, authorizedAddress, authorizedAddress];
 }
 
@@ -458,64 +451,16 @@ export async function testCreateFundingRound(
         juryWallets: milestone.juryWallets,
     }));
 
-    console.log('Testing contract call with parameters:', {
-        tokenAddress: params.tokenAddress,
-        targetAmount: params.targetAmount.toString(),
-        fundingDeadline: params.fundingDeadline,
-        milestonesCount: milestoneData.length,
-        milestones: milestoneData.map((m, i) => ({
-            index: i,
-            description: m.description,
-            fundingAmount: m.fundingAmount.toString(),
-            deadline: m.deadline,
-            juryWallets: m.juryWallets,
-        })),
-    });
-
-    // Additional debugging: Check current block timestamp
-    const currentBlock = await provider.getBlock('latest');
-    console.log('Current block timestamp:', currentBlock?.timestamp);
-    console.log('Funding deadline vs current time:', {
-        fundingDeadline: params.fundingDeadline,
-        currentTime: currentBlock?.timestamp || 0,
-        isInFuture: params.fundingDeadline > (currentBlock?.timestamp || 0),
-    });
-
-    // Check total milestone funding
-    const totalMilestoneFunding = milestoneData.reduce(
-        (sum, m) => sum + m.fundingAmount,
-        BigInt(0)
-    );
-    console.log('Milestone funding validation:', {
-        totalMilestoneFunding: totalMilestoneFunding.toString(),
-        targetAmount: params.targetAmount.toString(),
-        areEqual: totalMilestoneFunding === params.targetAmount,
-    });
-
-    // Check each milestone deadline
-    console.log('Milestone deadline validation:');
-    milestoneData.forEach((milestone, i) => {
-        const isValid = milestone.deadline > params.fundingDeadline;
-        console.log(
-            `Milestone ${i + 1}: deadline ${milestone.deadline} > funding ${params.fundingDeadline} = ${isValid}`
-        );
-    });
-
     // Check jury authorizations (parallel to avoid await in loops)
-    console.log('Jury authorization validation:');
     const juryChecks = milestoneData.flatMap((milestone, i) =>
         milestone.juryWallets.map(async (juryWallet, j) => {
             try {
                 const isAuthorized = (await factory.isAuthorizedJuror(juryWallet)) as boolean;
-                console.log(
-                    `Milestone ${i + 1}, Jury ${j + 1}: ${juryWallet} is authorized: ${isAuthorized}`
-                );
                 if (!isAuthorized) {
-                    console.error(`❌ Jury wallet ${juryWallet} is not authorized!`);
+                    throw new Error(`Jury wallet ${juryWallet} is not authorized!`);
                 }
                 return { milestone: i + 1, jury: j + 1, address: juryWallet, isAuthorized };
             } catch (error) {
-                console.error(`Error checking jury authorization for ${juryWallet}:`, error);
                 return { milestone: i + 1, jury: j + 1, address: juryWallet, isAuthorized: false };
             }
         })
@@ -525,88 +470,64 @@ export async function testCreateFundingRound(
     await Promise.all(juryChecks);
 
     // Check if the token address is valid
-    console.log('Token validation:');
     try {
         const tokenCode = await provider.getCode(params.tokenAddress);
-        console.log(`Token ${params.tokenAddress} is contract: ${tokenCode !== '0x'}`);
+        if (tokenCode === '0x') {
+            throw new Error('Token address is not a valid contract');
+        }
     } catch (error) {
-        console.error('Error checking token contract:', error);
+        throw new Error('Error checking token contract');
     }
 
     // Try to get the next round ID to make sure the factory is working
     try {
-        const nextRoundId = (await factory.getNextRoundId()) as bigint;
-        console.log('Factory working, next round ID:', nextRoundId.toString());
+        await factory.getNextRoundId();
     } catch (error) {
-        console.error('Error getting next round ID:', error);
+        throw new Error('Factory contract is not working properly');
     }
 
     // Check if the contract is paused
     try {
         const isPaused = (await factory.paused()) as boolean;
-        console.log('🚨 Contract paused status:', isPaused);
         if (isPaused) {
-            console.error(
-                '❌ CONTRACT IS PAUSED! This is likely the root cause of the transaction failure.'
-            );
             throw new Error(
                 'The factory contract is currently paused. Contact the contract owner to unpause it.'
             );
-        } else {
-            console.log('✅ Contract is not paused, proceeding with gas estimation...');
         }
     } catch (error) {
-        console.error('Error checking pause status:', error);
+        throw new Error('Error checking pause status');
     }
 
     try {
-        // Try to estimate gas first to get more detailed error
-        console.log('Attempting gas estimation...');
-        const gasEstimate = await factory.createFundingRound.estimateGas(
+        await factory.createFundingRound.estimateGas(
             params.tokenAddress,
             params.targetAmount,
             params.fundingDeadline,
-            milestoneData
+            milestoneData,
+            { gasLimit: 10000000 } // 10M gas limit
         );
-
-        console.log('✅ Gas estimate successful:', gasEstimate.toString());
     } catch (error) {
-        console.error('❌ Gas estimation failed - this is the root cause:', error);
-
         // Try to get more details about the error
         if (error instanceof Error) {
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
-
             // Check if this is a revert with reason
             if (error.message.includes('revert')) {
-                console.error('Transaction would revert - checking individual validations...');
+                throw new Error('Transaction would revert - validation failed');
             }
 
             // Try with a very high gas limit to see if it's a gas issue
-            console.log('Trying gas estimation with higher gas limit...');
             try {
-                const gasEstimateHighLimit = await factory.createFundingRound.estimateGas(
+                await factory.createFundingRound.estimateGas(
                     params.tokenAddress,
                     params.targetAmount,
                     params.fundingDeadline,
                     milestoneData,
                     { gasLimit: 10000000 } // 10M gas limit
                 );
-                console.log(
-                    '✅ Gas estimate with high limit successful:',
-                    gasEstimateHighLimit.toString()
-                );
             } catch (highGasError) {
-                console.error('❌ Gas estimation failed even with high gas limit:', highGasError);
-
                 // The issue is likely with contract deployment or MoneyMuleRound constructor
-                console.error('🚨 LIKELY ISSUE: MoneyMuleRound contract deployment is failing!');
-                console.error('Possible causes:');
-                console.error('1. MoneyMuleRound contract not deployed on this network');
-                console.error('2. MoneyMuleRound constructor has validation issues');
-                console.error('3. Contract creation gas limits exceeded');
-                console.error('4. Missing dependencies for MoneyMuleRound contract');
+                throw new Error(
+                    'MoneyMuleRound contract deployment is failing. Possible causes: contract not deployed, constructor validation issues, gas limits exceeded, or missing dependencies.'
+                );
             }
         }
 

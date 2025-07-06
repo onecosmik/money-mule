@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { DashboardNav } from '@/components/organisms/navigation/DashboardNav';
@@ -124,8 +124,254 @@ const fadeInUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
 };
 
+// Helper functions
+const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+    }).format(amount);
+
+const calculateProgress = (current: number, goal: number) => Math.min((current / goal) * 100, 100);
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'active':
+        case 'funding':
+            return 'bg-green-100 text-green-800';
+        case 'funding_complete':
+        case 'execution':
+            return 'bg-blue-100 text-blue-800';
+        case 'completed':
+            return 'bg-gray-100 text-gray-800';
+        case 'cancelled':
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+};
+
+const getStatusText = (status: string) => {
+    switch (status) {
+        case 'active':
+        case 'funding':
+            return 'Active Funding';
+        case 'funding_complete':
+        case 'execution':
+            return 'In Progress';
+        case 'completed':
+            return 'Completed';
+        case 'cancelled':
+            return 'Cancelled';
+        default:
+            return 'Unknown';
+    }
+};
+
+const getViabilityColor = (score: number) => {
+    if (score >= 90) return 'text-green-600';
+    if (score >= 80) return 'text-blue-600';
+    if (score >= 70) return 'text-yellow-600';
+    return 'text-red-600';
+};
+
+// ProjectCard component moved outside of main component
+const ProjectCard = ({ project, index }: { project: ProjectData; index: number }) => (
+    <motion.div
+        key={project.id}
+        variants={fadeInUp}
+        initial='hidden'
+        whileInView='visible'
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ delay: index * 0.1 }}
+        className='h-full'
+    >
+        <Link href={`/dashboard/projects/${project.founderAddress}`}>
+            <Card className='h-full border-green-200 hover:border-green-400 transition-colors duration-200 cursor-pointer hover:shadow-lg'>
+                <div className='relative'>
+                    <Image
+                        src={project.coverImage}
+                        alt={project.name}
+                        width={400}
+                        height={200}
+                        className='w-full h-48 object-cover rounded-t-lg'
+                    />
+                    <div className='absolute top-4 right-4 flex gap-2'>
+                        <Badge className={`${getStatusColor(project.status)} border-0`}>
+                            {getStatusText(project.status)}
+                        </Badge>
+                        {project.isFromDatabase && (
+                            <Badge className='bg-blue-100 text-blue-800 border-0'>Live</Badge>
+                        )}
+                    </div>
+                </div>
+
+                <CardHeader className='pb-3'>
+                    <div className='flex items-start justify-between'>
+                        <CardTitle className='text-lg font-bold text-gray-900 flex items-center gap-2'>
+                            <TrendingUp className='h-5 w-5 text-green-600' />
+                            {project.name}
+                        </CardTitle>
+                    </div>
+                    <CardDescription className='text-sm text-gray-600 line-clamp-2'>
+                        {project.description}
+                    </CardDescription>
+                    {project.category && (
+                        <Badge variant='outline' className='w-fit mt-2'>
+                            {project.category}
+                        </Badge>
+                    )}
+                </CardHeader>
+
+                <div className='px-6 pb-4'>
+                    <div className='flex items-center gap-2 mb-2'>
+                        <Target className='h-4 w-4 text-green-600' />
+                        <span className='text-sm font-medium text-gray-700'>Viability Score</span>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                        <span
+                            className={`text-2xl font-bold ${getViabilityColor(project.viabilityScore || 75)}`}
+                        >
+                            {project.viabilityScore || 75}
+                        </span>
+                        <span className='text-sm text-gray-500'>/100</span>
+                    </div>
+                </div>
+
+                <CardContent className='pt-0'>
+                    <div className='space-y-4'>
+                        {/* Funding Progress */}
+                        <div>
+                            <div className='flex justify-between items-center mb-2'>
+                                <span className='text-sm font-medium text-gray-700'>
+                                    Funding Progress
+                                </span>
+                                <span className='text-sm text-gray-600'>
+                                    {Math.round(
+                                        calculateProgress(
+                                            project.currentFunding,
+                                            project.fundingGoal
+                                        )
+                                    )}
+                                    %
+                                </span>
+                            </div>
+                            <div className='w-full bg-gray-200 rounded-full h-2'>
+                                <div
+                                    className='bg-gradient-to-r from-green-600 to-green-700 h-2 rounded-full transition-all duration-300'
+                                    style={{
+                                        width: `${calculateProgress(project.currentFunding, project.fundingGoal)}%`,
+                                    }}
+                                />
+                            </div>
+                            <div className='flex justify-between text-xs text-gray-600 mt-1'>
+                                <span>
+                                    {project.isFromDatabase
+                                        ? `${project.currentFunding} USDC`
+                                        : formatCurrency(project.currentFunding)}
+                                </span>
+                                <span>
+                                    {project.isFromDatabase
+                                        ? `${project.fundingGoal} USDC`
+                                        : formatCurrency(project.fundingGoal)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Project Details */}
+                        <div className='space-y-2'>
+                            <div className='flex items-center gap-2 text-sm text-gray-600'>
+                                <Globe className='h-4 w-4 text-green-600' />
+                                <span className='hover:text-green-600 transition-colors'>
+                                    {project.website === '#'
+                                        ? 'No website'
+                                        : project.website.replace('https://', '')}
+                                </span>
+                            </div>
+                            <div className='flex items-center gap-2 text-sm text-gray-600'>
+                                <CalendarDays className='h-4 w-4 text-green-600' />
+                                <span>
+                                    Deadline:{' '}
+                                    {new Date(project.fundingDeadline).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <div className='flex items-center gap-2 text-sm text-gray-600'>
+                                <Wallet className='h-4 w-4 text-green-600' />
+                                <span className='font-mono'>
+                                    {formatAddress(project.founderAddress)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Milestones */}
+                        <div>
+                            <div className='flex items-center gap-2 mb-2'>
+                                <User className='h-4 w-4 text-green-600' />
+                                <span className='text-sm font-medium text-gray-700'>
+                                    Milestones
+                                </span>
+                            </div>
+                            <div className='space-y-1'>
+                                {project.milestones.length > 0 ? (
+                                    <>
+                                        {project.milestones.slice(0, 2).map(milestone => (
+                                            <div
+                                                key={milestone.title}
+                                                className='flex items-center justify-between text-xs'
+                                            >
+                                                <span
+                                                    className={`${milestone.completed ? 'text-green-600' : 'text-gray-600'}`}
+                                                >
+                                                    {milestone.title}
+                                                </span>
+                                                <span
+                                                    className={`${milestone.completed ? 'text-green-600' : 'text-gray-600'}`}
+                                                >
+                                                    {milestone.completed ? '✓' : '○'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {project.milestones.length > 2 && (
+                                            <div className='text-xs text-gray-500'>
+                                                +{project.milestones.length - 2} more milestones
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className='text-xs text-gray-500'>
+                                        No milestones available
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className='pt-2'>
+                            <Button
+                                variant='outline'
+                                size='sm'
+                                className='w-full border-green-200 hover:bg-green-50 hover:border-green-400'
+                                onClick={e => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    // TODO: Implement funding logic
+                                }}
+                            >
+                                <DollarSign className='h-4 w-4 mr-2' />
+                                View Details
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </Link>
+    </motion.div>
+);
+
 export default function ProjectsPage() {
-    const { ready, authenticated } = usePrivy();
+    const { ready } = usePrivy();
     const { wallets } = useWallets();
     const [projects, setProjects] = useState<ProjectData[]>([]);
     const [dbProjects, setDbProjects] = useState<ProjectData[]>([]);
@@ -166,8 +412,8 @@ export default function ProjectsPage() {
                 category: round.category,
                 contractAddress: round.contract_address,
             };
-        } catch (error) {
-            console.error('Error converting round to project:', error);
+        } catch (err) {
+            console.error('Error converting round to project:', err);
             return {
                 id: round.id!,
                 name: round.title,
@@ -190,7 +436,7 @@ export default function ProjectsPage() {
     };
 
     // Load projects from database
-    const loadProjects = async () => {
+    const loadProjects = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -219,14 +465,8 @@ export default function ProjectsPage() {
             setDbProjects(dbProjectsData);
             setMyProjects(userProjectsData);
             setProjects([...dbProjectsData, ...mockProjectsWithFlag]);
-
-            console.log('Loaded projects:', {
-                dbProjects: dbProjectsData.length,
-                myProjects: userProjectsData.length,
-                total: dbProjectsData.length + mockProjectsWithFlag.length,
-            });
-        } catch (error) {
-            console.error('Error loading projects:', error);
+        } catch (err) {
+            console.error('Error loading projects:', err);
             setError('Failed to load projects. Please try again.');
             toast.error('Failed to load projects');
 
@@ -239,262 +479,13 @@ export default function ProjectsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [connectedWallet]);
 
     useEffect(() => {
         if (ready) {
-            loadProjects();
+            loadProjects().catch(console.error);
         }
-    }, [ready, connectedWallet?.address]);
-
-    const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
-
-    const formatCurrency = (amount: number) =>
-        new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-        }).format(amount);
-
-    const calculateProgress = (current: number, goal: number) =>
-        Math.min((current / goal) * 100, 100);
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'active':
-            case 'funding':
-                return 'bg-green-100 text-green-800';
-            case 'funding_complete':
-            case 'execution':
-                return 'bg-blue-100 text-blue-800';
-            case 'completed':
-                return 'bg-gray-100 text-gray-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'active':
-            case 'funding':
-                return 'Active Funding';
-            case 'funding_complete':
-            case 'execution':
-                return 'In Progress';
-            case 'completed':
-                return 'Completed';
-            case 'cancelled':
-                return 'Cancelled';
-            default:
-                return 'Unknown';
-        }
-    };
-
-    const getViabilityColor = (score: number) => {
-        if (score >= 90) return 'text-green-600';
-        if (score >= 80) return 'text-blue-600';
-        if (score >= 70) return 'text-yellow-600';
-        return 'text-red-600';
-    };
-
-    const ProjectCard = ({ project, index }: { project: ProjectData; index: number }) => (
-        <motion.div
-            key={project.id}
-            variants={fadeInUp}
-            initial='hidden'
-            whileInView='visible'
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ delay: index * 0.1 }}
-            className='h-full'
-        >
-            <Link href={`/dashboard/projects/${project.founderAddress}`}>
-                <Card className='h-full border-green-200 hover:border-green-400 transition-colors duration-200 cursor-pointer hover:shadow-lg'>
-                    <div className='relative'>
-                        <Image
-                            src={project.coverImage}
-                            alt={project.name}
-                            width={400}
-                            height={200}
-                            className='w-full h-48 object-cover rounded-t-lg'
-                        />
-                        <div className='absolute top-4 right-4 flex gap-2'>
-                            <Badge className={`${getStatusColor(project.status)} border-0`}>
-                                {getStatusText(project.status)}
-                            </Badge>
-                            {project.isFromDatabase && (
-                                <Badge className='bg-blue-100 text-blue-800 border-0'>Live</Badge>
-                            )}
-                        </div>
-                    </div>
-
-                    <CardHeader className='pb-3'>
-                        <div className='flex items-start justify-between'>
-                            <CardTitle className='text-lg font-bold text-gray-900 flex items-center gap-2'>
-                                <TrendingUp className='h-5 w-5 text-green-600' />
-                                {project.name}
-                            </CardTitle>
-                        </div>
-                        <CardDescription className='text-sm text-gray-600 line-clamp-2'>
-                            {project.description}
-                        </CardDescription>
-                        {project.category && (
-                            <Badge variant='outline' className='w-fit mt-2'>
-                                {project.category}
-                            </Badge>
-                        )}
-                    </CardHeader>
-
-                    <div className='px-6 pb-4'>
-                        <div className='flex items-center gap-2 mb-2'>
-                            <Target className='h-4 w-4 text-green-600' />
-                            <span className='text-sm font-medium text-gray-700'>
-                                Viability Score
-                            </span>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                            <span
-                                className={`text-2xl font-bold ${getViabilityColor(project.viabilityScore || 75)}`}
-                            >
-                                {project.viabilityScore || 75}
-                            </span>
-                            <span className='text-sm text-gray-500'>/100</span>
-                        </div>
-                    </div>
-
-                    <CardContent className='pt-0'>
-                        <div className='space-y-4'>
-                            {/* Funding Progress */}
-                            <div>
-                                <div className='flex justify-between items-center mb-2'>
-                                    <span className='text-sm font-medium text-gray-700'>
-                                        Funding Progress
-                                    </span>
-                                    <span className='text-sm text-gray-600'>
-                                        {Math.round(
-                                            calculateProgress(
-                                                project.currentFunding,
-                                                project.fundingGoal
-                                            )
-                                        )}
-                                        %
-                                    </span>
-                                </div>
-                                <div className='w-full bg-gray-200 rounded-full h-2'>
-                                    <div
-                                        className='bg-gradient-to-r from-green-600 to-green-700 h-2 rounded-full transition-all duration-300'
-                                        style={{
-                                            width: `${calculateProgress(project.currentFunding, project.fundingGoal)}%`,
-                                        }}
-                                    />
-                                </div>
-                                <div className='flex justify-between text-xs text-gray-600 mt-1'>
-                                    <span>
-                                        {project.isFromDatabase
-                                            ? `${project.currentFunding} USDC`
-                                            : formatCurrency(project.currentFunding)}
-                                    </span>
-                                    <span>
-                                        {project.isFromDatabase
-                                            ? `${project.fundingGoal} USDC`
-                                            : formatCurrency(project.fundingGoal)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Project Details */}
-                            <div className='space-y-2'>
-                                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                                    <Globe className='h-4 w-4 text-green-600' />
-                                    <span className='hover:text-green-600 transition-colors'>
-                                        {project.website === '#'
-                                            ? 'No website'
-                                            : project.website.replace('https://', '')}
-                                    </span>
-                                </div>
-                                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                                    <CalendarDays className='h-4 w-4 text-green-600' />
-                                    <span>
-                                        Deadline:{' '}
-                                        {new Date(project.fundingDeadline).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                                    <Wallet className='h-4 w-4 text-green-600' />
-                                    <span className='font-mono'>
-                                        {formatAddress(project.founderAddress)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Milestones */}
-                            <div>
-                                <div className='flex items-center gap-2 mb-2'>
-                                    <User className='h-4 w-4 text-green-600' />
-                                    <span className='text-sm font-medium text-gray-700'>
-                                        Milestones
-                                    </span>
-                                </div>
-                                <div className='space-y-1'>
-                                    {project.milestones.length > 0 ? (
-                                        <>
-                                            {project.milestones
-                                                .slice(0, 2)
-                                                .map((milestone, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className='flex items-center justify-between text-xs'
-                                                    >
-                                                        <span
-                                                            className={`${milestone.completed ? 'text-green-600' : 'text-gray-600'}`}
-                                                        >
-                                                            {milestone.title}
-                                                        </span>
-                                                        <span
-                                                            className={`${milestone.completed ? 'text-green-600' : 'text-gray-600'}`}
-                                                        >
-                                                            {milestone.completed ? '✓' : '○'}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            {project.milestones.length > 2 && (
-                                                <div className='text-xs text-gray-500'>
-                                                    +{project.milestones.length - 2} more milestones
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className='text-xs text-gray-500'>
-                                            No milestones available
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Action Button */}
-                            <div className='pt-2'>
-                                <Button
-                                    variant='outline'
-                                    size='sm'
-                                    className='w-full border-green-200 hover:bg-green-50 hover:border-green-400'
-                                    onClick={e => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        // TODO: Implement funding logic
-                                    }}
-                                >
-                                    <DollarSign className='h-4 w-4 mr-2' />
-                                    View Details
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </Link>
-        </motion.div>
-    );
+    }, [ready, loadProjects]);
 
     if (!ready) {
         return (

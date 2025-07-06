@@ -32,7 +32,7 @@ interface FaucetStatusResponse {
 }
 
 export default function FaucetPage() {
-    const { ready, user } = usePrivy();
+    const { ready } = usePrivy();
     const { wallets } = useWallets();
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingStatus, setIsCheckingStatus] = useState(false);
@@ -326,10 +326,11 @@ export default function FaucetPage() {
                                     handleClaimTokens().catch(console.error);
                                 }}
                                 disabled={isLoading || !faucetStatus?.canClaim}
-                                className={`px-8 py-3 rounded-lg font-semibold text-white transition-all ${isLoading || !faucetStatus?.canClaim
+                                className={`px-8 py-3 rounded-lg font-semibold text-white transition-all ${
+                                    isLoading || !faucetStatus?.canClaim
                                         ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-green-600 hover:bg-green-700 active:scale-95'
-                                    }`}
+                                }`}
                             >
                                 {renderButtonContent()}
                             </button>
