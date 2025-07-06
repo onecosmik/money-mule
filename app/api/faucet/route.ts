@@ -1,8 +1,7 @@
 import { ethers } from 'ethers';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Store last claim times in memory (in production, use Redis or database)
-const lastClaimTimes = new Map<string, number>();
+import { faucetHelpers } from '@/lib/supabase';
 
 // Network configuration
 const SAGA_CHAINLET_RPC = 'https://moneymule-2751721147387000-1.jsonrpc.sagarpc.io';
@@ -56,23 +55,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Check 24-hour cooldown
-        const now = Date.now();
-        const lastClaim = lastClaimTimes.get(walletAddress.toLowerCase());
-        const cooldownPeriod = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        // Check 24-hour cooldown using Supabase
+        const canClaim = await faucetHelpers.canMakeFaucetRequest(walletAddress.toLowerCase());
 
-        if (lastClaim && now - lastClaim < cooldownPeriod) {
-            const nextClaimTime = lastClaim + cooldownPeriod;
-            const hoursLeft = Math.ceil((nextClaimTime - now) / (60 * 60 * 1000));
+        if (!canClaim) {
+            const stats = await faucetHelpers.getWalletStats(walletAddress.toLowerCase());
+            const lastClaim = stats.last_request ? new Date(stats.last_request).getTime() : null;
+            const cooldownPeriod = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: `Please wait ${hoursLeft} hours before claiming again`,
-                    nextClaimTime,
-                },
-                { status: 429 }
-            );
+            if (lastClaim) {
+                const nextClaimTime = lastClaim + cooldownPeriod;
+                const hoursLeft = Math.ceil((nextClaimTime - Date.now()) / (60 * 60 * 1000));
+
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: `Please wait ${hoursLeft} hours before claiming again`,
+                        nextClaimTime,
+                    },
+                    { status: 429 }
+                );
+            }
         }
 
         // Setup provider and wallet
@@ -113,14 +116,15 @@ export async function POST(request: NextRequest) {
                 transactionHashes.usdc = usdcTx.hash;
             }
 
-            // Update last claim time
-            lastClaimTimes.set(walletAddress.toLowerCase(), now);
+            // Record faucet request in Supabase
+            await faucetHelpers.recordFaucetRequest(walletAddress.toLowerCase());
 
+            const cooldownPeriod = 24 * 60 * 60 * 1000;
             return NextResponse.json({
                 success: true,
                 message: 'Tokens sent successfully! You received 1 MULE and 10 USDC.',
                 transactionHashes,
-                nextClaimTime: now + cooldownPeriod,
+                nextClaimTime: Date.now() + cooldownPeriod,
             });
         } catch (txError) {
             console.error('Transaction error:', txError);
@@ -138,7 +142,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const walletAddress = searchParams.get('address');
@@ -150,13 +154,16 @@ export function GET(request: NextRequest) {
             );
         }
 
-        const now = Date.now();
-        const lastClaim = lastClaimTimes.get(walletAddress.toLowerCase());
-        const cooldownPeriod = 24 * 60 * 60 * 1000;
+        // Check faucet status using Supabase
+        const canClaim = await faucetHelpers.canMakeFaucetRequest(walletAddress.toLowerCase());
+        const stats = await faucetHelpers.getWalletStats(walletAddress.toLowerCase());
 
-        if (lastClaim) {
+        const cooldownPeriod = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+
+        if (stats.last_request) {
+            const lastClaim = new Date(stats.last_request).getTime();
             const nextClaimTime = lastClaim + cooldownPeriod;
-            const canClaim = now >= nextClaimTime;
             const hoursLeft = canClaim ? 0 : Math.ceil((nextClaimTime - now) / (60 * 60 * 1000));
 
             return NextResponse.json({
