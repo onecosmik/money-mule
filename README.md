@@ -1,111 +1,478 @@
-# Next.js Boilerplate: Your Journey Starts Here 🚀
+# MoneyMule Frontend 🌐
 
-Welcome, traveler, to a well-trodden path for starting your next web adventure. This isn't just a blank slate; it's a carefully prepared basecamp 🏕️, equipped with modern tools and sensible defaults, designed to let you focus on building _your_ unique application, not wrestling with setup.
+![](https://img.shields.io/badge/Next.js-informational?style=flat&logo=next.js&logoColor=white&color=6aa6f8)
+![](https://img.shields.io/badge/React-informational?style=flat&logo=react&logoColor=white&color=6aa6f8)
+![](https://img.shields.io/badge/TypeScript-informational?style=flat&logo=typescript&logoColor=white&color=6aa6f8)
+![](https://img.shields.io/badge/Tailwind_CSS-informational?style=flat&logo=tailwind-css&logoColor=white&color=6aa6f8)
+![](https://img.shields.io/badge/Ethers.js-informational?style=flat&logo=ethereum&logoColor=white&color=6aa6f8)
+![](https://img.shields.io/badge/Framer_Motion-informational?style=flat&logo=framer&logoColor=white&color=6aa6f8)
 
-Think of this boilerplate as a solid foundation built with:
+A modern web application for MoneyMule's milestone-based funding platform and investor tools. Built with Next.js, React, and Web3 integration for seamless blockchain interactions.
 
-- **Discipline:** 🧐 Pre-configured linting, formatting, and type-checking.
-- **Efficiency:** ⚡ Modern tooling like Next.js, Bun, and Tailwind CSS.
-- **Structure:** 🏗️ Sensible project layout and community-standard components.
-- **Guidance:** 🧭 A comprehensive set of documentation to keep everyone on the same page.
+## 🏗️ MoneyMule Ecosystem
 
-> A boring codebase doesn't make a bored developer, on the contrary, it frees developers up to think about important stuff...
+| Repository                                                                | Description                                         | Status    |
+| ------------------------------------------------------------------------- | --------------------------------------------------- | --------- |
+| **[Frontend](https://github.com/TomasDmArg/money-mule)**                  | Next.js web application with React & Tailwind CSS   | ✅ Active |
+| **[Backend](https://github.com/TomasDmArg/money-mule-backend)**           | AI Multiagent system for deck and document analysis | ✅ Active |
+| **[Smart Contracts](https://github.com/TomasDmArg/money-mule-contracts)** | Solidity contracts with Hardhat & TypeScript        | ✅ Active |
 
-## The Toolkit: What's in the Bag? 🎒
+## 🌟 Overview
 
-We've packed the essentials so you don't have to:
+MoneyMule Frontend provides an intuitive interface for AI-powered investor tools and milestone-based funding platform. The application combines intelligent investment analysis with decentralized funding mechanisms, enabling investors to make data-driven decisions while project founders access milestone-based capital through smart contracts.
 
-- [Next.js](https://nextjs.org/): The battle-tested React framework ⚛️.
-- [TypeScript](https://www.typescriptlang.org/): For catching errors before they happen 🔒.
-- [Tailwind CSS](https://tailwindcss.com/): Utility-first styling that stays out of your way 🎨.
-- [shadcn/ui](https://ui.shadcn.com/): Beautiful, accessible components you can own ✨.
-- [HugeIcons](https://hugeicons.com/): Beautiful, customizable icons for your UI 🎭.
-- [Framer Motion](https://www.framer.com/motion/): Powerful animation library for React 🌊.
-- [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/): The tireless guardians of code style and quality 🧹.
-- [Million.js](https://million.js.org/): Linting hints for performance gains 🏎️.
-- [Bun](https://bun.sh/): The speedy all-in-one toolkit 🐇.
-- [Docker](https://www.docker.com/): Containerization for consistent environments 🐳.
-- **The Handbook (`.docs` folder):** Our collected wisdom on how we build things 📚.
+## 🏗️ Architecture
 
-## The Handbook: Essential Reading for the Trail 🗺️
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        UI[React Components]
+        State[State Management]
+        Router[Next.js Router]
+        API[API Integration]
+    end
 
-Before you venture forth, familiarize yourself with the local customs and survival guides. These documents ensure we all navigate the codebase effectively and consistently.
+    subgraph "Web3 Layer"
+        Wallet[Wallet Connection]
+        Contract[Smart Contract Interface]
+        Ethers[Ethers.js Provider]
+    end
 
-- **[Contributing Guidelines](./.docs/CONTRIBUTING.md):** The rules of the road (commits, branches, PRs) 🤝.
-- **[Ticket System](./.docs/TICKET_SYSTEM.md):** Deciphering the maps (tasks and requirements) 🎫.
-- **[Priority System](./.docs/PRIORITY_SYSTEM.md):** Standardized priority management for tickets and tasks 🎯.
-- **[Coding Standards](./.docs/CODING_STANDARDS.md):** Speaking the common tongue (naming, style, TS, JSDoc) 🗣️.
-- **[Architecture Guidelines](./.docs/ARCHITECTURE.md):** Ways to structure your components (Atomic Design inspiration) 🧱.
-- **[State Management](./.docs/STATE_MANAGEMENT.md):** Tackling the app state managment ⚙️.
-- **[Testing Strategies](./.docs/TESTING.md):** Building confidence with automated checks ✅.
-- **[Debugging Techniques](./.docs/DEBUGGING.md):** Finding your way when lost in the code 🔦.
-- **[Performance Guidelines](./.docs/PERFORMANCE.md):** Keeping things running smoothly and swiftly 💨.
-- **[Security Guidelines](./.docs/SECURITY.md):** Warding off the digital goblins (OWASP & best practices) 🛡️.
-- **[AI Assistance](./.docs/AI_ASSISTANCE.md):** Leveraging your trusty AI companion 🤖.
+    subgraph "Backend Services"
+        MultiAgent[Multiagent System]
+        DocAnalysis[Document Analysis]
+        DeckAnalysis[Deck Analysis]
+        AIOrchestration[AI Orchestration]
+    end
 
-## Setting Up Camp: Getting Started ⛺
+    subgraph "Blockchain"
+        Factory[MoneyMule Factory]
+        Rounds[Funding Rounds]
+        Tokens[ERC20 Tokens]
+    end
 
-Ready to pitch your tent?
+    UI --> State
+    UI --> Router
+    State --> API
 
-1.  **Claim the Land:** Clone this repository. 🗺️
-    ```bash
-    git clone https://github.com/TomasDmArg/next-js-template
-    cd next-js-template
-    ```
-2.  **Gather Supplies:** Install dependencies. 🎒
-    ```bash
-    bun i
-    ```
-3.  **Configure Environment:** Set up your environment variables. 🔧
-    Create a `.env.local` file in the root directory:
+    Wallet --> Contract
+    Contract --> Ethers
+    Ethers --> Factory
+    Ethers --> Rounds
+    Ethers --> Tokens
 
-    ```bash
-    NEXT_PUBLIC_API_URL=https://backend.moneymule.xyz
-    ```
+    API --> MultiAgent
+    MultiAgent --> DocAnalysis
+    MultiAgent --> DeckAnalysis
+    MultiAgent --> AIOrchestration
 
-    > **Note:** The application defaults to `https://backend.moneymule.xyz` if no environment variable is set.
+    classDef frontend fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef web3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef backend fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef blockchain fill:#fff3e0,stroke:#f57c00,stroke-width:2px
 
-4.  **Light the Fire:** Start the development server. 🔥
-    ```bash
-    bun run dev
-    ```
-5.  **Scout the Area:** Open [http://localhost:3000](http://localhost:3000) in your browser. 👀
+    class UI,State,Router,API frontend
+    class Wallet,Contract,Ethers web3
+    class MultiAgent,DocAnalysis,DeckAnalysis,AIOrchestration backend
+    class Factory,Rounds,Tokens blockchain
+```
 
-## Environment Variables 🔧
+## ✨ Key Features
 
-The application uses the following environment variables:
+### 🤖 **AI-Powered Investment Tools**
 
-- `NEXT_PUBLIC_API_URL`: The base URL for the Money Mule API (defaults to `https://backend.moneymule.xyz`)
+- **📊 Market Analysis**: AI-driven market trend analysis and insights
+- **💡 Investment Recommendations**: Personalized investment suggestions based on user profile
+- **🎯 Risk Assessment**: Intelligent risk analysis for funding opportunities
+- **📈 Performance Prediction**: ML-powered project success probability models
+- **🔍 Due Diligence**: Automated project evaluation and scoring
+- **📊 Portfolio Optimization**: AI-assisted portfolio balancing and diversification
 
-## Containerized Expeditions: Docker 🐳
+### 🎯 **Project Management**
 
-For those who prefer their environments neatly packed:
+- **📊 Dashboard**: Comprehensive project overview with funding progress
+- **🎨 Project Creation**: Intuitive form for setting up funding rounds
+- **📈 Analytics**: Real-time funding metrics and milestone tracking
+- **🎯 Milestone Management**: Visual milestone timeline and progress tracking
 
-1.  **Build the Vessel:** 🛠️
-    ```bash
-    docker build -t nextjs-template .
-    ```
-2.  **Set Sail:** ⛵
-    ```bash
-    docker run -p 3000:3000 nextjs-template
-    ```
+### 💰 **Investment Interface**
 
-## Joining the Caravan: Contributing 🧑‍🤝‍🧑
+- **🔍 Project Discovery**: AI-enhanced project browsing with smart filtering
+- **💎 Investment Flow**: Seamless investment process with wallet integration
+- **📊 Portfolio**: Track investments and returns across projects with AI insights
+- **🔄 Withdrawal**: Easy withdrawal process for uncommitted funds
+- **🤖 Smart Alerts**: AI-powered notifications for investment opportunities
 
-New ideas and improvements are always welcome. Before you chart a new course, please consult the **[Contributing Guidelines](./.docs/CONTRIBUTING.md)**.
+### 🗳️ **Jury Interface**
 
-## Versión en Español 🇪🇸
+- **⚖️ Voting Dashboard**: Clean interface for milestone evaluation
+- **📋 Milestone Details**: Comprehensive milestone information and evidence
+- **🎯 Decision Making**: AI-assisted voting recommendations
+- **📊 Voting History**: Track past votes and decisions
 
-¿Preferís leer la documentación en español? Tenemos una versión completa en español disponible en la carpeta [`.docs/es`](./.docs/es).
+### 🔐 **Web3 Integration**
 
-- **[Guía de Contribución](./.docs/es/CONTRIBUTING.md):** Las reglas del camino (commits, branches, PRs) 🤝.
-- **[Sistema de Tickets](./.docs/es/TICKET_SYSTEM.md):** Descifrando los mapas (tareas y requisitos) 🎫.
-- **[Sistema de Prioridades](./.docs/es/PRIORITY_SYSTEM.md):** Gestión estandarizada de prioridades para tickets y tareas 🎯.
-- **[Estándares de Código](./.docs/es/CODING_STANDARDS.md):** Hablando el idioma común (nombrado, estilo, TS, JSDoc) 🗣️.
-- **[Guías de Arquitectura](./.docs/es/ARCHITECTURE.md):** Formas de estructurar tus componentes (inspiración en Atomic Design) 🧱.
-- **[Gestión de Estado](./.docs/es/STATE_MANAGEMENT.md):** Dominando la gestión del estado ⚙️.
-- **[Estrategias de Testing](./.docs/es/TESTING.md):** Construyendo confianza con verificaciones automatizadas ✅.
-- **[Técnicas de Depuración](./.docs/es/DEBUGGING.md):** Encontrando el camino cuando te pierdes en el código 🔦.
-- **[Guías de Rendimiento](./.docs/es/PERFORMANCE.md):** Manteniendo las cosas funcionando suave y rápidamente 💨.
-- **[Guías de Seguridad](./.docs/es/SECURITY.md):** Protegiéndote de los duendes digitales (OWASP y mejores prácticas) 🛡️.
-- **[Asistencia de IA](./.docs/es/AI_ASSISTANCE.md):** Aprovechando tu fiel compañero de IA 🤖.
+- **🦊 Wallet Connect**: Support for MetaMask and other Web3 wallets
+- **🔄 Smart Contract Interaction**: Direct blockchain interactions
+- **🌐 Network Support**: Saga Chainlet integration
+- **⚡ Transaction Management**: Real-time transaction status and history
+
+## 🎨 Design System
+
+### **UI Components**
+
+- **🧩 shadcn/ui**: Beautiful, accessible component library
+- **🎭 HugeIcons**: Comprehensive icon set
+- **🌊 Framer Motion**: Smooth animations and transitions
+- **🎨 Tailwind CSS**: Utility-first styling approach
+- **🤖 AI Components**: Custom AI-powered interface elements
+
+### **User Experience**
+
+- **📱 Responsive Design**: Mobile-first approach with seamless desktop experience
+- **⚡ Performance**: Optimized loading and rendering
+- **🎯 Accessibility**: WCAG compliant with keyboard navigation
+- **🌙 Dark Mode**: Built-in theme switching
+- **🤖 Intelligent UX**: AI-powered user experience optimization
+
+## 🚀 Quick Start
+
+### **Prerequisites**
+
+- Node.js 18+ or Bun
+- Web3 wallet (MetaMask recommended)
+- Access to Saga Chainlet network
+
+### **Installation**
+
+```bash
+# Clone the repository
+git clone https://github.com/TomasDmArg/money-mule.git
+cd money-mule
+
+# Install dependencies
+bun install
+
+# Configure environment
+cp .env.example .env.local
+```
+
+### **Environment Setup**
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL=https://backend.moneymule.xyz
+
+# Smart Contract Addresses
+NEXT_PUBLIC_FACTORY_ADDRESS=0xa1820208Dff37B39a8a324e82E3449283e21703b
+NEXT_PUBLIC_USDC_ADDRESS=0xA2bE65F0Bfb810eF7B17807F3cd10D428f989A4a
+
+# Network Configuration
+NEXT_PUBLIC_CHAIN_ID=2751721147387000
+NEXT_PUBLIC_RPC_URL=https://moneymule-2751721147387000-1.jsonrpc.sagarpc.io
+NEXT_PUBLIC_EXPLORER_URL=https://moneymule-2751721147387000-1.sagaexplorer.io
+```
+
+### **Development**
+
+```bash
+# Start development server
+bun run dev
+
+# Build for production
+bun run build
+
+# Start production server
+bun run start
+```
+
+## 🧪 Testing
+
+### **Test Suite**
+
+```bash
+# Run all tests
+bun run test
+
+# Run tests with coverage
+bun run test:coverage
+
+# Run tests in watch mode
+bun run test:watch
+
+# Run E2E tests
+bun run test:e2e
+```
+
+### **Test Coverage**
+
+- ✅ Component unit tests
+- ✅ Web3 integration tests
+- ✅ API integration tests
+- ✅ User workflow E2E tests
+- ✅ Accessibility tests
+- ✅ Performance tests
+
+## 🐳 Docker Deployment
+
+### **Development**
+
+```bash
+# Build development image
+docker build -t moneymule-frontend:dev .
+
+# Run development container
+docker run -p 3000:3000 moneymule-frontend:dev
+```
+
+### **Production**
+
+```bash
+# Build production image
+docker build -t moneymule-frontend:prod --target production .
+
+# Run production container
+docker run -p 3000:3000 moneymule-frontend:prod
+```
+
+## 📱 User Flows
+
+### **Project Founder Flow**
+
+```mermaid
+graph LR
+    A[Connect Wallet] --> B[Create Project]
+    B --> C[Set Milestones]
+    C --> D[Configure Funding]
+    D --> E[Whitelist Investors]
+    E --> F[Monitor Progress]
+    F --> G[Complete Milestones]
+    G --> H[Release Funds]
+
+    classDef founder fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    class A,B,C,D,E,F,G,H founder
+```
+
+### **Investor Flow**
+
+```mermaid
+graph LR
+    A[Connect Wallet] --> B[Browse Projects]
+    B --> C[Review Details]
+    C --> D[Invest Funds]
+    D --> E[Track Progress]
+    E --> F[Monitor Milestones]
+    F --> G[Receive Returns]
+
+    classDef investor fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    class A,B,C,D,E,F,G investor
+```
+
+### **Jury Member Flow**
+
+```mermaid
+graph LR
+    A[Connect Wallet] --> B[Review Assignments]
+    B --> C[Evaluate Milestone]
+    C --> D[Cast Vote]
+    D --> E[Monitor Results]
+
+    classDef jury fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    class A,B,C,D,E jury
+```
+
+## 🎯 Core Features
+
+### **Dashboard**
+
+- **📊 Overview**: Project statistics and funding progress
+- **🎯 Milestones**: Visual timeline with completion status
+- **💰 Financial**: Investment tracking and fund management
+- **📈 Analytics**: Performance metrics and insights
+
+### **Project Creation**
+
+- **📝 Form Wizard**: Step-by-step project setup
+- **🎯 Milestone Builder**: Interactive milestone configuration
+- **💰 Funding Setup**: Target amount and token selection
+- **👥 Jury Selection**: Jury member assignment interface
+
+### **Investment Interface**
+
+- **🔍 Project Browser**: AI-enhanced filter and search functionality
+- **💎 Investment Calculator**: Real-time investment calculations with AI insights
+- **📊 Portfolio View**: Investment tracking and management with AI analytics
+- **🔄 Transaction History**: Complete transaction log with pattern analysis
+- **🤖 AI Recommendations**: Personalized investment suggestions
+
+### **AI Analytics Dashboard**
+
+- **📊 Market Intelligence**: Real-time market analysis and trends
+- **🎯 Investment Insights**: AI-powered investment recommendations
+- **📈 Performance Metrics**: Predictive analytics for project success
+- **🔍 Risk Analysis**: Comprehensive risk assessment tools
+- **💡 Smart Alerts**: AI-generated investment opportunity alerts
+
+### **Jury Interface**
+
+- **⚖️ Voting Portal**: Milestone evaluation interface
+- **📋 Evidence Review**: Comprehensive milestone evidence
+- **🎯 Decision Panel**: Clear voting options and confirmation
+- **📊 Vote Tracking**: Historical voting records
+
+## 🛠️ Technology Stack
+
+### **Frontend Framework**
+
+- **⚛️ Next.js 14**: React framework with App Router
+- **🎨 React 18**: Component library with hooks
+- **📝 TypeScript**: Type safety and developer experience
+- **🎯 Tailwind CSS**: Utility-first styling
+
+### **Web3 Integration**
+
+- **🔗 Ethers.js v6**: Ethereum library
+- **🦊 Wallet Connect**: Multi-wallet support
+- **⚡ Web3Modal**: Wallet connection interface
+- **🌐 Saga Chainlet**: Blockchain network
+
+### **State Management**
+
+- **⚡ Zustand**: Lightweight state management
+- **🔄 React Query**: Server state management
+- **📊 Context API**: Component state sharing
+
+### **UI/UX**
+
+- **🧩 shadcn/ui**: Component library
+- **🎭 HugeIcons**: Icon system
+- **🌊 Framer Motion**: Animation library
+- **🎨 Radix UI**: Accessible primitives
+
+### **Development Tools**
+
+- **🚀 Bun**: Fast JavaScript runtime
+- **📦 ESLint**: Code linting
+- **🎨 Prettier**: Code formatting
+- **🧪 Jest**: Testing framework
+- **📊 Storybook**: Component documentation
+
+### **AI & Machine Learning**
+
+- **🤖 TensorFlow.js**: Client-side ML models
+- **📊 Chart.js**: Advanced data visualization
+- **🎯 AI APIs**: Integration with AI service providers
+- **📈 Analytics**: Real-time data processing and insights
+
+## 📚 Documentation
+
+### **Development Guides**
+
+- **[Contributing Guidelines](./.docs/CONTRIBUTING.md)** - Development workflow and standards
+- **[Coding Standards](./.docs/CODING_STANDARDS.md)** - Code style and best practices
+- **[Architecture Guidelines](./.docs/ARCHITECTURE.md)** - Component structure and patterns
+- **[Testing Strategies](./.docs/TESTING.md)** - Testing approaches and guidelines
+
+### **User Guides**
+
+- **[User Manual](./.docs/USER_MANUAL.md)** - Complete user guide
+- **[Web3 Integration](./.docs/WEB3_INTEGRATION.md)** - Wallet setup and blockchain interactions
+- **[Troubleshooting](./.docs/TROUBLESHOOTING.md)** - Common issues and solutions
+
+## 🔒 Security Features
+
+### **Web3 Security**
+
+- **🔐 Wallet Integration**: Secure wallet connections
+- **✅ Transaction Validation**: Pre-transaction verification
+- **🛡️ Contract Verification**: Smart contract address validation
+- **🔍 Transaction Monitoring**: Real-time transaction tracking
+
+### **Application Security**
+
+- **🛡️ Input Validation**: Comprehensive form validation
+- **🔐 Environment Variables**: Secure configuration management
+- **🚨 Error Handling**: Graceful error management
+- **📝 Audit Logging**: Complete user action tracking
+
+## 🚀 Performance Optimization
+
+### **Loading Performance**
+
+- **⚡ Code Splitting**: Route-based code splitting
+- **🎯 Lazy Loading**: Component lazy loading
+- **📊 Bundle Analysis**: Webpack bundle optimization
+- **🔄 Caching**: Efficient caching strategies
+
+### **Runtime Performance**
+
+- **🎯 Memoization**: React.memo and useMemo optimization
+- **🔄 Virtual Scrolling**: Large list optimization
+- **📊 State Optimization**: Efficient state management
+- **⚡ Web Workers**: Background processing
+
+## 🌍 Deployment
+
+### **Production Deployment**
+
+```bash
+# Build production bundle
+bun run build
+
+# Start production server
+bun run start
+
+# Deploy to Vercel
+vercel --prod
+```
+
+### **Environment Configuration**
+
+- **🔧 Production**: Environment-specific configurations
+- **🌐 CDN**: Static asset optimization
+- **📊 Analytics**: Performance monitoring
+- **🚨 Error Tracking**: Production error monitoring
+
+## 🏆 Built For ETH Global Cannes 2025
+
+### **Innovation Highlights**
+
+- **🤖 AI-Powered Tools**: Advanced AI integration for investment analysis
+- **🎨 Modern UI/UX**: Beautiful, intuitive interface design
+- **⚡ Performance**: Optimized for speed and efficiency
+- **📱 Mobile-First**: Responsive design for all devices
+- **🔗 Web3 Integration**: Seamless blockchain interactions
+- **🎯 User Experience**: Intuitive workflow design with AI assistance
+
+### **Technical Excellence**
+
+- **🛠️ Modern Stack**: Latest technologies and best practices
+- **🤖 AI Integration**: Cutting-edge machine learning capabilities
+- **🧪 Testing**: Comprehensive test coverage
+- **📊 Performance**: Optimized loading and rendering
+- **🔒 Security**: Secure Web3 and application practices
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+### 📋 Key Principles
+
+1. **🤖 AI-First**: Intelligent tools for better investment decisions
+2. **🎨 User-Centric**: Design focused on user experience
+3. **⚡ Performance**: Optimized for speed and efficiency
+4. **🔒 Security**: Secure Web3 and application practices
+5. **📱 Accessibility**: Inclusive design for all users
+6. **🔄 Maintainability**: Clean, testable, and documented code
+
+**🎉 Experience the future of AI-powered investment tools and milestone-based funding!**
