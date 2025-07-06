@@ -5,7 +5,6 @@
 ![](https://img.shields.io/badge/TypeScript-informational?style=flat&logo=typescript&logoColor=white&color=6aa6f8)
 ![](https://img.shields.io/badge/Tailwind_CSS-informational?style=flat&logo=tailwind-css&logoColor=white&color=6aa6f8)
 ![](https://img.shields.io/badge/Ethers.js-informational?style=flat&logo=ethereum&logoColor=white&color=6aa6f8)
-![](https://img.shields.io/badge/Framer_Motion-informational?style=flat&logo=framer&logoColor=white&color=6aa6f8)
 
 A modern web application for MoneyMule's milestone-based funding platform and investor tools. Built with Next.js, React, and Web3 integration for seamless blockchain interactions.
 
