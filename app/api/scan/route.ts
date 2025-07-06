@@ -46,7 +46,7 @@ const mockScanResults: ScanResult[] = [
 
 export async function POST(request: NextRequest) {
     try {
-        const body: ScanRequest = await request.json();
+        const body = (await request.json()) as ScanRequest;
 
         if (body.action === 'start') {
             // Simulate scan start

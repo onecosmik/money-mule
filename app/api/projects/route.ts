@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const body: CreateProjectRequest = await request.json();
+        const body = (await request.json()) as CreateProjectRequest;
 
         // Simulate creating a new project
         const newProject: Project = {

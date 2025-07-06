@@ -322,7 +322,7 @@ export default function DocumentsPage() {
         if (file) {
             const validation = validateFile(file);
             if (!validation.isValid) {
-                alert(`Invalid file: ${validation.error}`);
+                console.error(`Invalid file: ${validation.error}`);
                 return;
             }
             setSelectedFile(file);
@@ -332,7 +332,7 @@ export default function DocumentsPage() {
     // Handle file upload
     const handleUpload = useCallback(async () => {
         if (!selectedFile) {
-            alert('Please select a file to upload');
+            console.error('Please select a file to upload');
             return;
         }
 
@@ -373,14 +373,13 @@ export default function DocumentsPage() {
             if (response.ok) {
                 const result = (await response.json()) as DocumentResult;
                 updateDocumentStatus(newDocument.id, 'completed', 100, result);
-                alert('Document analysis completed successfully!');
             } else {
                 throw new Error('Analysis failed');
             }
         } catch (error) {
             console.error('Error uploading document:', error);
             updateDocumentStatus(newDocument.id, 'failed', 0);
-            alert('There was an error analyzing your document. Please try again.');
+            console.error('There was an error analyzing your document. Please try again.');
         }
     }, [selectedFile, documents, saveDocuments, updateDocumentStatus]);
 
