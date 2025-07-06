@@ -19,7 +19,7 @@ A modern web application for MoneyMule's milestone-based funding platform and in
 
 ## 🌟 Overview
 
-MoneyMule Frontend provides an intuitive interface for AI-powered investor tools and milestone-based funding platform. The application combines intelligent investment analysis with decentralized funding mechanisms, enabling investors to make data-driven decisions while project founders access milestone-based capital through smart contracts.
+MoneyMule Frontend provides an intuitive interface for AI-powered investor tools and project analysis platform. The application combines intelligent investment analysis with advanced document processing, enabling investors to make data-driven decisions through comprehensive AI-powered pitch deck and document analysis.
 
 ## 🏗️ Architecture
 
@@ -103,12 +103,12 @@ graph TB
 - **🔄 Withdrawal**: Easy withdrawal process for uncommitted funds
 - **🤖 Smart Alerts**: AI-powered notifications for investment opportunities
 
-### 🗳️ **Jury Interface**
+### 📄 **Document Analysis**
 
-- **⚖️ Voting Dashboard**: Clean interface for milestone evaluation
-- **📋 Milestone Details**: Comprehensive milestone information and evidence
-- **🎯 Decision Making**: AI-assisted voting recommendations
-- **📊 Voting History**: Track past votes and decisions
+- **🔍 Pitch Deck Analysis**: AI-powered pitch deck evaluation and scoring
+- **📊 Document Processing**: Automated document analysis and insights
+- **🎯 Content Extraction**: Intelligent data extraction from documents
+- **📈 Comparative Analysis**: AI-driven comparison between projects
 
 ### 🔐 **Web3 Integration**
 
@@ -244,7 +244,7 @@ graph LR
     A[Connect Wallet] --> B[Create Project]
     B --> C[Set Milestones]
     C --> D[Configure Funding]
-    D --> E[Whitelist Investors]
+    D --> E[Upload Documents]
     E --> F[Monitor Progress]
     F --> G[Complete Milestones]
     G --> H[Release Funds]
@@ -258,27 +258,14 @@ graph LR
 ```mermaid
 graph LR
     A[Connect Wallet] --> B[Browse Projects]
-    B --> C[Review Details]
-    C --> D[Invest Funds]
-    D --> E[Track Progress]
-    E --> F[Monitor Milestones]
-    F --> G[Receive Returns]
+    B --> C[AI Analysis]
+    C --> D[Review Documents]
+    D --> E[Invest Funds]
+    E --> F[Track Progress]
+    F --> G[Monitor Returns]
 
     classDef investor fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     class A,B,C,D,E,F,G investor
-```
-
-### **Jury Member Flow**
-
-```mermaid
-graph LR
-    A[Connect Wallet] --> B[Review Assignments]
-    B --> C[Evaluate Milestone]
-    C --> D[Cast Vote]
-    D --> E[Monitor Results]
-
-    classDef jury fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    class A,B,C,D,E jury
 ```
 
 ## 🎯 Core Features
@@ -295,7 +282,7 @@ graph LR
 - **📝 Form Wizard**: Step-by-step project setup
 - **🎯 Milestone Builder**: Interactive milestone configuration
 - **💰 Funding Setup**: Target amount and token selection
-- **👥 Jury Selection**: Jury member assignment interface
+- **📄 Document Upload**: Pitch deck and document management
 
 ### **Investment Interface**
 
@@ -313,12 +300,12 @@ graph LR
 - **🔍 Risk Analysis**: Comprehensive risk assessment tools
 - **💡 Smart Alerts**: AI-generated investment opportunity alerts
 
-### **Jury Interface**
+### **Document Analysis Center**
 
-- **⚖️ Voting Portal**: Milestone evaluation interface
-- **📋 Evidence Review**: Comprehensive milestone evidence
-- **🎯 Decision Panel**: Clear voting options and confirmation
-- **📊 Vote Tracking**: Historical voting records
+- **📄 Pitch Deck Analyzer**: AI-powered pitch deck evaluation
+- **📊 Document Insights**: Automated document analysis and scoring
+- **🎯 Content Intelligence**: Smart data extraction and categorization
+- **📈 Comparative Reports**: AI-driven project comparison tools
 
 ## 🛠️ Technology Stack
 
