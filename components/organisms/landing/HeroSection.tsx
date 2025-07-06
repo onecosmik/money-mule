@@ -55,7 +55,7 @@ export function HeroSection() {
 
                         <motion.div
                             variants={fadeInUp}
-                            className='flex items-center justify-center lg:justify-start space-x-8'
+                            className='flex items-center justify-center lg:justify-start space-x-4 sm:space-x-8'
                         >
                             <div className='text-center'>
                                 <div className='text-2xl font-bold text-gray-900'>90%</div>
@@ -73,22 +73,22 @@ export function HeroSection() {
 
                         <motion.div
                             variants={fadeInUp}
-                            className='flex flex-col sm:flex-row gap-4 justify-center lg:justify-start'
+                            className='flex flex-col lg:flex-row gap-4 justify-center lg:justify-start w-full'
                         >
-                            <Link href='/dashboard'>
+                            <Link href='/dashboard' className='w-full lg:w-auto'>
                                 <Button
                                     size='lg'
-                                    className='bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 text-lg font-semibold flex items-center gap-2'
+                                    className='w-full lg:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 text-lg font-semibold flex items-center justify-center gap-2'
                                 >
                                     Start Free Trial
                                     <ArrowRight className='w-5 h-5' />
                                 </Button>
                             </Link>
-                            <Link href='/dashboard/projects'>
+                            <Link href='/dashboard/projects' className='w-full lg:w-auto'>
                                 <Button
                                     size='lg'
                                     variant='outline'
-                                    className='border-green-600 text-green-700 hover:bg-green-50 px-8 py-4 text-lg font-semibold'
+                                    className='w-full lg:w-auto border-green-600 text-green-700 hover:bg-green-50 px-8 py-4 text-lg font-semibold'
                                 >
                                     Browse Projects
                                 </Button>
@@ -97,7 +97,7 @@ export function HeroSection() {
 
                         <motion.div
                             variants={fadeInUp}
-                            className='flex items-center justify-center lg:justify-start space-x-4 text-sm text-gray-600'
+                            className='flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-gray-600'
                         >
                             <div className='flex items-center space-x-2'>
                                 <CheckCircle className='w-4 h-4 text-green-600' />

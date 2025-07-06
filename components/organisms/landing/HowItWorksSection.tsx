@@ -34,7 +34,7 @@ export function HowItWorksSection() {
             icon: <BarChart3 className='w-8 h-8' />,
             title: 'AI-Powered Analysis',
             description:
-                'Advanced algorithms assess founder reputation, project viability, market potential, and risk factors in real-time.',
+                'Advanced algorithms assess founder reputation, project viability, market potential, and key follow up questions.',
             number: '02',
             color: 'text-green-600',
             bgColor: 'bg-green-50',
@@ -42,9 +42,8 @@ export function HowItWorksSection() {
         },
         {
             icon: <Target className='w-8 h-8' />,
-            title: 'Smart Portfolio Management',
-            description:
-                'Our platform helps you identify promising opportunities and manage your investment portfolio with data-driven insights.',
+            title: 'Risk Assessment',
+            description: 'Risk analysis for investment documents and projects information.',
             number: '03',
             color: 'text-purple-600',
             bgColor: 'bg-purple-50',
