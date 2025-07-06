@@ -1,7 +1,7 @@
 'use client';
 
 import { useConnectWallet, usePrivy, useWallets } from '@privy-io/react-auth';
-import { FileText, Heart, LogOut, TrendingUp, Wallet } from 'lucide-react';
+import { DollarSign, FileText, Heart, LogOut, TrendingUp, Wallet } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -127,6 +127,17 @@ function DashboardNavContent({ pathname }: { pathname: string }) {
                         >
                             <Heart className='h-4 w-4' />
                             Fund projects
+                        </Button>
+                    </Link>
+
+                    <Link href='/dashboard/faucet'>
+                        <Button
+                            variant={pathname === '/dashboard/faucet' ? 'default' : 'outline'}
+                            size='sm'
+                            className='flex items-center gap-2'
+                        >
+                            <DollarSign className='h-4 w-4' />
+                            Faucet
                         </Button>
                     </Link>
 
