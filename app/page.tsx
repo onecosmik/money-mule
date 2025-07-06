@@ -2,12 +2,12 @@
 
 import { MainLayout } from '@/components/templates/main-layout';
 
-import { FeaturesSection } from './components/landing/FeaturesSection';
-import { FinalCTASection } from './components/landing/FinalCTASection';
-import { HeroSection } from './components/landing/HeroSection';
-import { LogoNavbar } from './components/landing/LogoNavbar';
-import { PricingSection } from './components/landing/PricingSection';
-import { ProblemSection } from './components/landing/ProblemSection';
+import { FeaturesSection } from '../components/organisms/landing/FeaturesSection';
+import { FinalCTASection } from '../components/organisms/landing/FinalCTASection';
+import { HeroSection } from '../components/organisms/landing/HeroSection';
+import { LogoNavbar } from '../components/organisms/landing/LogoNavbar';
+import { PricingSection } from '../components/organisms/landing/PricingSection';
+import { ProblemSection } from '../components/organisms/landing/ProblemSection';
 
 export default function Home() {
     return (
